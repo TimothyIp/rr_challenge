@@ -72,7 +72,8 @@ exports.register = function(req, res, next) {
 
       res.status(201).json({
         token: 'JWT ' + generateToken(userInfo),
-        user: userInfo
+        user: userInfo,
+        message: "Successfully created your account"
       });
     });
   });
