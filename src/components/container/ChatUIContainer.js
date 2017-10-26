@@ -28,7 +28,8 @@ export default class ChatUIContainer extends Component {
       socketId: "",
       composedMessage: "",
       currentChannel: "Public-Main",
-      privateMessage: ""
+      privateMessage: "",
+      conversations: []
     }
   }
 
@@ -37,29 +38,22 @@ export default class ChatUIContainer extends Component {
   }
 
   componentDidMount() {
-    //get messages
-    axios.get(`${API_URL}/chat`, null, {
-      headers: { Authorization: token}
-    })
-    .then(res => {
-      console.log(res)
-    })
-    .catch(err => {
-      console.log(err)
-    })
-
     // Logs user in if they have a token after refreshing or revisiting page.
     console.log("token", tokenUser, token)
-    let hasToken = () => {
-      if (token) {
-        this.setState({
-          username: tokenUser.username,
-          id: tokenUser._id
-        })
-      }
-    }
-    hasToken();
+    this.hasToken();
+
+    // Gets most recent conversations
+    this.getConversations();
   }
+
+  hasToken = () => {
+    if (token) {
+      this.setState({
+        username: tokenUser.username,
+        id: tokenUser._id
+      });
+    }
+  };
 
   initSocket = () => {
     const socket = io(SOCKET_URL);
@@ -94,8 +88,8 @@ export default class ChatUIContainer extends Component {
 
       this.setState({
         loginError: errorLog
-      })
-    })
+      });
+    });
   }
 
   userLogout = () => {
@@ -105,7 +99,7 @@ export default class ChatUIContainer extends Component {
       username: "",
       id: "",
       socket: null
-    })
+    });
   }
 
   userRegistration = ({ username, password }) => {
@@ -119,7 +113,7 @@ export default class ChatUIContainer extends Component {
         id: res.data.user._id,
         registrationError:[],
         formsShown: false
-      })
+      });
     })
     .catch(error => {
       // Always show most recent errors
@@ -130,8 +124,23 @@ export default class ChatUIContainer extends Component {
 
       this.setState({
         registrationError: errorLog
+      });
+    });
+  }
+
+  getConversations = () => {
+    const activeChannel = this.state.currentChannel;
+    axios.get(`${API_URL}/chat`, {
+      headers: { Authorization: token }
+    })
+    .then(res => {
+      this.setState({
+        conversations: res.data.conversations
       })
     })
+    .catch(err => {
+      console.log(err)
+    });
   }
 
   sendMessage = (composedMessage, recipient) => {
@@ -155,14 +164,14 @@ export default class ChatUIContainer extends Component {
       })
       .catch(err => {
         console.log(err)
-      })
+      });
     }
   }
 
   handleChange = (event) => {
     this.setState({
       [event.target.name]: event.target.value
-    })
+    });
   }
 
   handleSubmit = (e) => {
@@ -176,28 +185,28 @@ export default class ChatUIContainer extends Component {
       this.setState({
         formsMethod: "login",
         formsShown: true
-      })
+      });
     }
 
     if(method === "register") {
       this.setState({
         formsMethod: "register",
         formsShown: true
-      })
+      });
     }
 
     if(method === "close") {
       this.setState({
         formsMethod: "",
         formsShown: false
-      })
+      });
     }
   }
 
   closeForm = () => {
     this.setState({
       formsShown: false
-    })
+    });
   }
 
   render() {

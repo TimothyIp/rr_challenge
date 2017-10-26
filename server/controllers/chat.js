@@ -113,7 +113,7 @@ exports.postToChannel = function(req, res, next) {
 
 exports.getConversations = function (req, res, next) {
   // Show recent message from each conversation
-  Conversation.find({ $or: [{ participants: req.user._id }, { channelName: req.body.channelName}] })
+  Conversation.find({ participants: req.user._id })
     .select('_id')
     .exec((err, conversations) => {
       if (err) {
