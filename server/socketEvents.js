@@ -12,8 +12,10 @@ exports = module.exports = function(io) {
       socket.leave(conversation);
       console.log('user has left conversation')
     });
+
+
     
-    socket.on('new message', (conersation) => {
+    socket.on('new message', (conversation) => {
       io.sockets.in(conversation).emit('refresh messages', conversation);
     });
 

@@ -60,10 +60,6 @@ exports.postToChannel = function(req, res, next) {
   const channelName = req.params.channelName;
   const composedMessage = req.body.composedMessage;
 
-  console.log("REQ USER----------", req.user)
-  console.log("REQ BODY----------", req.body)
-  console.log("REQ PARAMS--------", req.params)
-
   if (!channelName) {
     res.status(422).json({
       error: 'Enter a valid channel name.'
@@ -113,7 +109,25 @@ exports.postToChannel = function(req, res, next) {
 }
 
 exports.getChannelConversations = function(req, res, next) {
-  console.log('req params', req.params)
+  const channelName = req.params.channelName;
+
+  Message.find({ channelName })
+    .select('createdAt body author')
+    .sort('-createdAt')
+    .populate({
+      path: 'author',
+      select: 'username'
+    })
+    .exec((err, messages) => {
+      if (err) {
+        res.send({ error: err });
+        return next(err);
+      }
+
+      return res.status(200).json({
+        channelMessages: messages
+      })
+    })
 }
 
 exports.getConversations = function (req, res, next) {

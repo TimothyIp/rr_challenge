@@ -18,6 +18,8 @@ export default class ChatUIContainer extends Component {
   constructor(){
     super();
     
+    this.userLogin = this.userLogin.bind(this);
+
     this.state = {
       username: "",
       id: "",
@@ -25,12 +27,13 @@ export default class ChatUIContainer extends Component {
       registrationError: [],
       formsShown: false,
       formsMethod: "",
-      socketId: "",
+      socket: null,
       composedMessage: "",
       currentChannel: "Public-Main",
       privateMessage: "",
       conversations: [],
-      channelConversations: []
+      channelConversations: [],
+      token:""
     }
   }
 
@@ -40,18 +43,19 @@ export default class ChatUIContainer extends Component {
 
   componentDidMount() {
     // Logs user in if they have a token after refreshing or revisiting page.
-    console.log("token", tokenUser, token)
     this.hasToken();
+    console.log("token", tokenUser, token)
 
-    // Gets most recent conversations
-    this.getUsersConversations();
+    // Get current channels messages
+    this.getChannelConversations();
   }
 
   hasToken = () => {
     if (token) {
       this.setState({
         username: tokenUser.username,
-        id: tokenUser._id
+        id: tokenUser._id,
+        token
       });
     }
   };
@@ -62,36 +66,34 @@ export default class ChatUIContainer extends Component {
     socket.on('connect', () => {
       console.log('Connected', socket.id);
       this.setState({
-        socketId: socket.id
+        socket
       })
     })
   }
 
-  userLogin = ({ username, password }) => {
-    axios.post(`${API_URL}/auth/login`, { username, password })
-    .then(res => {
-      console.log(res);
-
-      this.setTokens(res)
-
+  async userLogin({ username, password }) {
+    try {
+      const userData = await axios.post(`${API_URL}/auth/login`, { username, password });
+      cookies.set('token', userData.data.token, { path: "/" })
+      cookies.set('user', userData.data.user, { path: "/" })
       this.setState({
-        username: res.data.user.username,
-        id: res.data.user._id,
+        username: userData.data.user.username,
+        id: userData.data.user._id,
         loginError:[],
         formsShown: false,
+        token: userData.data.token
       });
-    })
-    .catch(error => {
-      // Always show most recent errors
-      const errorLog = Array.from(this.state.loginError);
-
-      errorLog.length = [];
-      errorLog.push(error);
-
-      this.setState({
-        loginError: errorLog
-      });
-    });
+    } catch(error) {
+        // Always show most recent errors
+        const errorLog = Array.from(this.state.loginError);
+  
+        errorLog.length = [];
+        errorLog.push(error);
+  
+        this.setState({
+          loginError: errorLog
+        });
+    }
   }
 
   userLogout = () => {
@@ -108,7 +110,9 @@ export default class ChatUIContainer extends Component {
     axios.post(`${API_URL}/auth/register`, { username, password })
     .then(res => {
       console.log(res);
-      this.setTokens(res);
+      cookies.set('token', res.data.token, { path: "/" })
+      cookies.set('user', res.data.user, { path: "/" })
+
       this.setState({
         username: res.data.username,
         id: res.data.user._id,
@@ -129,25 +133,25 @@ export default class ChatUIContainer extends Component {
     });
   }
 
-  setTokens = (res) => {
-    cookies.set('token', res.data.token, { path: "/" });
-    cookies.set('user', res.data.user, { path: "/" });
-    return cookies.get('token')
-  }
-
   getChannelConversations = () => {
-
+    axios.get(`${API_URL}/chat/channel/${this.state.currentChannel}`)
+    .then(res => {
+      this.setState({
+        channelConversations: res.data.channelMessages
+      });
+    })
+    .catch(error => {
+      console.log(error)
+    })
   }
 
   getUsersConversations = () => {
-    console.log('getting convos')
-    console.log(token)
     axios.get(`${API_URL}/chat`, {
-      headers: { Authorization: token }
+      headers: { Authorization: this.state.token }
     })
     .then(res => {
       this.setState({
-        conversations: res.data.conversations
+        conversations: res.data.conversations || []
       })
     })
     .catch(err => {
@@ -156,10 +160,12 @@ export default class ChatUIContainer extends Component {
   }
 
   sendMessage = (composedMessage, recipient) => {
+    const socket = this.state.socket;
+
     if (!this.state.privateMessage) {
       console.log("posting to channel")
       axios.post(`${API_URL}/chat/postchannel/${this.state.currentChannel}`, { composedMessage }, {
-        headers: { Authorization: token }
+        headers: { Authorization: this.state.token }
       })
       .then(res => {
         console.log(res)
@@ -169,7 +175,7 @@ export default class ChatUIContainer extends Component {
       })
     } else {
       axios.post(`${API_URL}/chat/new/${recipient}`, { composedMessage }, {
-        headers: { Authorization: token }
+        headers: { Authorization: this.state.token }
       })
       .then(res => {
         console.log(res)
@@ -251,6 +257,7 @@ export default class ChatUIContainer extends Component {
         <ChatBox 
           handleChange={this.handleChange}
           handleSubmit={this.handleSubmit}
+          getUsersConversations={this.getUsersConversations}
           {...this.state}
         />
       </div>
