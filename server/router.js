@@ -36,6 +36,9 @@ module.exports = function(app) {
         // Start new conversation
         chatRoutes.post('/new/:recipient', requireAuth, ChatController.newConversation);
 
+        // View Chat Channel messages
+        chatRoutes.get('/channel/:channelName', ChatController.getChannelConversations);
+
         // Post to Channel
         chatRoutes.post('/postchannel/:channelName', requireAuth, ChatController.postToChannel);
 

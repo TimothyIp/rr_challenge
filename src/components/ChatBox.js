@@ -1,6 +1,16 @@
 import React from 'react';
+import Moment from 'moment';
+import ChatLists from './ChatLists';
+
 
 const ChatBox = (props) => {
+
+  const layoutContainer = {
+    display: "flex",
+    flexDirection: "row",
+    width: "100%",
+  }
+
   const messageBox = {
     width: "720px",
     height: "590px",
@@ -8,33 +18,31 @@ const ChatBox = (props) => {
     overflow: "scroll"
   }
 
-  const { handleSubmit, handleChange, currentChannel, conversations } = props;
+  const chatBox = {
+    flexDirection: "column",
+    width: "50%"
+  }
+
+  const { handleSubmit, handleChange, currentChannel, conversations, id } = props;
 
   return (
-    <div>
-      <h3>Current Channel: {currentChannel}</h3>
-      <div style={messageBox}>
+      <div style={layoutContainer}>
         {
-          (conversations.length)
-            ? <ul>
-                {conversations.map((conversation, index) => {
-                  return(
-                    <li key={`convoId-${index}`}>
-                      <p>{conversation[0].body}</p>
-                      <p>{conversation[0].author.username}</p>
-                      <p>{conversation[0].createdAt}</p>
-                    </li>
-                  )
-                })}
-              </ul>
-            : <p>No Conversations</p>
+          (id)
+          ? <ChatLists 
+              {...props}
+              />
+            : null
         }
+        <div style={chatBox}>
+          <h3>Current Channel: {currentChannel}</h3>
+          <div style={messageBox}></div>
+          <form onSubmit={handleSubmit}>
+            <input onChange={handleChange} name="composedMessage" type="text" autoComplete="off"/>
+            <button>Send</button>
+          </form>
+        </div>
       </div>
-      <form onSubmit={handleSubmit}>
-        <input onChange={handleChange} name="composedMessage" type="text" autoComplete="off"/>
-        <button>Send</button>
-      </form>
-    </div>
   )
 }
 

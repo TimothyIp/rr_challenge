@@ -29,7 +29,8 @@ export default class ChatUIContainer extends Component {
       composedMessage: "",
       currentChannel: "Public-Main",
       privateMessage: "",
-      conversations: []
+      conversations: [],
+      channelConversations: []
     }
   }
 
@@ -43,7 +44,7 @@ export default class ChatUIContainer extends Component {
     this.hasToken();
 
     // Gets most recent conversations
-    this.getConversations();
+    this.getUsersConversations();
   }
 
   hasToken = () => {
@@ -70,14 +71,15 @@ export default class ChatUIContainer extends Component {
     axios.post(`${API_URL}/auth/login`, { username, password })
     .then(res => {
       console.log(res);
-      cookies.set('token', res.data.token, { path: "/" });
-      cookies.set('user', res.data.user, { path: "/" });
+
+      this.setTokens(res)
+
       this.setState({
         username: res.data.user.username,
         id: res.data.user._id,
         loginError:[],
-        formsShown: false
-      })
+        formsShown: false,
+      });
     })
     .catch(error => {
       // Always show most recent errors
@@ -106,8 +108,7 @@ export default class ChatUIContainer extends Component {
     axios.post(`${API_URL}/auth/register`, { username, password })
     .then(res => {
       console.log(res);
-      cookies.set('token', res.data.token, { path: "/" });
-      cookies.set('user', res.data.user, { path: "/" });
+      this.setTokens(res);
       this.setState({
         username: res.data.username,
         id: res.data.user._id,
@@ -128,8 +129,19 @@ export default class ChatUIContainer extends Component {
     });
   }
 
-  getConversations = () => {
-    const activeChannel = this.state.currentChannel;
+  setTokens = (res) => {
+    cookies.set('token', res.data.token, { path: "/" });
+    cookies.set('user', res.data.user, { path: "/" });
+    return cookies.get('token')
+  }
+
+  getChannelConversations = () => {
+
+  }
+
+  getUsersConversations = () => {
+    console.log('getting convos')
+    console.log(token)
     axios.get(`${API_URL}/chat`, {
       headers: { Authorization: token }
     })

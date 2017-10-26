@@ -35,7 +35,8 @@ exports.newConversation = function(req, res, next) {
     const message = new Message({
       conversationId: newConversation._id,
       body: req.body.composedMessage,
-      author: req.user._id
+      author: req.user._id,
+      channelName: req.body
     });
 
     message.save(function(err, newMessage) {
@@ -90,7 +91,8 @@ exports.postToChannel = function(req, res, next) {
     const post = new Message({
       conversationId: postToChannel._id,
       body: composedMessage,
-      author: req.user._id
+      author: req.user._id,
+      channelName
     });
 
     post.save(function(err, newPost) {
@@ -110,6 +112,9 @@ exports.postToChannel = function(req, res, next) {
 
 }
 
+exports.getChannelConversations = function(req, res, next) {
+  console.log('req params', req.params)
+}
 
 exports.getConversations = function (req, res, next) {
   // Show recent message from each conversation

@@ -13,6 +13,9 @@ const MessageSchema = new Schema({
   author: {
     type: Schema.Types.ObjectId,
     ref: 'User'
+  },
+  channelName: {
+    type: String
   }
 },
 {
