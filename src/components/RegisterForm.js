@@ -14,7 +14,6 @@ export default class RegisterForm extends Component {
     this.state = {
       username: "",
       password: "",
-      registrationError: []
     }
   }
 
@@ -29,40 +28,22 @@ export default class RegisterForm extends Component {
 
     const { username, password } = this.state;
 
-    axios.post(`${API_URL}/auth/register`, { username, password })
-      .then(res => {
-        console.log(res);
-        cookies.set('token', res.data.token, { path: "/" });
-        cookies.set('user', res.data.user, { path: "/" });
-        this.setState({
-          registrationError:[]
-        })
-      })
-      .catch(error => {
-        // Always show most recent errors
-        const errorLog = Array.from(this.state.registrationError);
-
-        errorLog.length = [];
-        errorLog.push(error);
-
-        this.setState({
-          registrationError: errorLog
-        })
-      })
+    this.props.userRegistration({ username, password });
   }
 
   render() {
     return (
       <div>
         REGISTER FORM
+        <button onClick={this.props.closeForm}>Close</button>
         <form onSubmit={this.handleSubmit}>
           <input onChange={this.handleChange} name="username" type="text" label="Username" placeholder="Enter a Username"/>
           <input onChange={this.handleChange} name="password" type="password" label="Password" placeholder="Enter a password"/>
           {
-            (this.state.registrationError.length)
+            (this.props.registrationError.length)
               ? <Alert 
                   header="Something went wrong"
-                  content={`${this.state.registrationError[0].response.data.error}`}
+                  content={`${this.props.registrationError[0].response.data.error}`}
                 />
               : null
           }

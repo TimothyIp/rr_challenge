@@ -1,17 +1,13 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
-import Navigation from './components/Navigation';
 import ChatUIContainer from './components/container/ChatUIContainer';
 
 class App extends Component {
   constructor() {
     super();
-   
-    this.displayChat = this.displayChat.bind(this);
-    
+
     this.state = {
-      username: "",
       chatShown: true
     }
   }
@@ -25,10 +21,10 @@ class App extends Component {
   render() {
     return (
       <div>
-        <Navigation />
         <h2>
-          Main page
+          Sample Main Page
         </h2>
+        <p>Sample information goes here</p>
         {
           (this.state.chatShown)
             ? <ChatUIContainer />
