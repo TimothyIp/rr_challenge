@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 
 const Navigation = (props) => {
   const { displayForms, id, userLogout, username } = props;

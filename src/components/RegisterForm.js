@@ -1,11 +1,5 @@
 import React, { Component } from 'react';
-import axios from 'axios';
-import Cookies from 'universal-cookie';
 import Alert from './Alert';
-
-const API_URL = 'http://localhost:3000/api';
-const cookies = new Cookies();
-
 
 export default class RegisterForm extends Component {
   constructor(){

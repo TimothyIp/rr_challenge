@@ -4,11 +4,15 @@ import RegisterForm from '../RegisterForm';
 import Cookies from 'universal-cookie';
 import axios from 'axios';
 import Navigation from '../Navigation';
+import ChatBox from '../ChatBox';
+import openSocket from 'socket.io-client';
+
 
 const API_URL = 'http://localhost:3000/api';
 const cookies = new Cookies();
 const token = cookies.get('token');
 const tokenUser = cookies.get('user');
+const socket = openSocket('http://localhost:3000');
 
 export default class ChatUIContainer extends Component {
   constructor(){
@@ -128,7 +132,6 @@ export default class ChatUIContainer extends Component {
     })
   }
 
-
   render() {
     return (
       <div>
@@ -156,6 +159,7 @@ export default class ChatUIContainer extends Component {
             : null
         }
         <div>Chat Room Appears</div>
+        <ChatBox />
       </div>
     )
   }
