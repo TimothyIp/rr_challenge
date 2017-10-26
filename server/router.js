@@ -30,11 +30,14 @@ module.exports = function(app) {
         // Gets individual conversations
         chatRoutes.get('/:conversationId', requireAuth, ChatController.getConversation);
 
-        // Replys to conversations
+        // Reply to conversations
         chatRoutes.post('/:conversationId', requireAuth, ChatController.sendReply);
 
         // Start new conversation
         chatRoutes.post('/new/:recipient', requireAuth, ChatController.newConversation);
+
+        // Post to Channel
+        chatRoutes.post('/postchannel/:channelName', requireAuth, ChatController.postToChannel);
 
         // Set URL for API groups
         app.use('/api', apiRoutes);

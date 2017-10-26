@@ -5,14 +5,14 @@ import Cookies from 'universal-cookie';
 import axios from 'axios';
 import Navigation from '../Navigation';
 import ChatBox from '../ChatBox';
-import openSocket from 'socket.io-client';
+import io from 'socket.io-client';
 
 
 const API_URL = 'http://localhost:3000/api';
 const cookies = new Cookies();
 const token = cookies.get('token');
 const tokenUser = cookies.get('user');
-const socket = openSocket('http://localhost:3000');
+const SOCKET_URL = "http://localhost:3000";
 
 export default class ChatUIContainer extends Component {
   constructor(){
@@ -24,11 +24,30 @@ export default class ChatUIContainer extends Component {
       loginError: [],
       registrationError: [],
       formsShown: false,
-      formsMethod: ""
+      formsMethod: "",
+      socketId: "",
+      composedMessage: "",
+      currentChannel: "Public-Main",
+      privateMessage: ""
     }
   }
 
+  componentWillMount() {
+    this.initSocket();
+  }
+
   componentDidMount() {
+    //get messages
+    axios.get(`${API_URL}/chat`, null, {
+      headers: { Authorization: token}
+    })
+    .then(res => {
+      console.log(res)
+    })
+    .catch(err => {
+      console.log(err)
+    })
+
     // Logs user in if they have a token after refreshing or revisiting page.
     console.log("token", tokenUser, token)
     let hasToken = () => {
@@ -40,6 +59,17 @@ export default class ChatUIContainer extends Component {
       }
     }
     hasToken();
+  }
+
+  initSocket = () => {
+    const socket = io(SOCKET_URL);
+
+    socket.on('connect', () => {
+      console.log('Connected', socket.id);
+      this.setState({
+        socketId: socket.id
+      })
+    })
   }
 
   userLogin = ({ username, password }) => {
@@ -73,7 +103,8 @@ export default class ChatUIContainer extends Component {
     cookies.remove('user', { path: '/' });
     this.setState({
       username: "",
-      id: ""
+      id: "",
+      socket: null
     })
   }
 
@@ -101,6 +132,43 @@ export default class ChatUIContainer extends Component {
         registrationError: errorLog
       })
     })
+  }
+
+  sendMessage = (composedMessage, recipient) => {
+    if (!this.state.privateMessage) {
+      console.log("posting to channel")
+      axios.post(`${API_URL}/chat/postchannel/${this.state.currentChannel}`, { composedMessage }, {
+        headers: { Authorization: token }
+      })
+      .then(res => {
+        console.log(res)
+      })
+      .catch(err => {
+        console.log(err)
+      })
+    } else {
+      axios.post(`${API_URL}/chat/new/${recipient}`, { composedMessage }, {
+        headers: { Authorization: token }
+      })
+      .then(res => {
+        console.log(res)
+      })
+      .catch(err => {
+        console.log(err)
+      })
+    }
+  }
+
+  handleChange = (event) => {
+    this.setState({
+      [event.target.name]: event.target.value
+    })
+  }
+
+  handleSubmit = (e) => {
+    e.preventDefault();
+
+    this.sendMessage(this.state.composedMessage);
   }
 
   displayForms = (method) => {
@@ -159,7 +227,11 @@ export default class ChatUIContainer extends Component {
             : null
         }
         <div>Chat Room Appears</div>
-        <ChatBox />
+        <ChatBox 
+          handleChange={this.handleChange}
+          handleSubmit={this.handleSubmit}
+          {...this.state}
+        />
       </div>
     )
   }

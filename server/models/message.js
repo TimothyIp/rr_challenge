@@ -13,9 +13,6 @@ const MessageSchema = new Schema({
   author: {
     type: Schema.Types.ObjectId,
     ref: 'User'
-  },
-  globalChat: {
-    type: Boolean
   }
 },
 {

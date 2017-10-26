@@ -5,7 +5,7 @@ exports = module.exports = function(io) {
 
     socket.on('enter a conversation', (conversation) => {
       socket.join(conversation);
-      console.log('user has joined conversation')
+      console.log('user has joined conversation' , conversation)
     });
 
     socket.on('leave conversation', (conversation) => {
