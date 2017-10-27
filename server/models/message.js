@@ -10,11 +10,16 @@ const MessageSchema = new Schema({
     type: String,
     required: true
   },
-  author: {
-    type: Schema.Types.ObjectId,
-    ref: 'User'
-  },
+  author: [{
+    kind: String,
+    item: {
+      type: String, refPath: 'author.kind'
+    }
+  }],
   channelName: {
+    type: String
+  },
+  guestPost: {
     type: String
   }
 },

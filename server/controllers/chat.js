@@ -60,6 +60,8 @@ exports.postToChannel = function(req, res, next) {
   const channelName = req.params.channelName;
   const composedMessage = req.body.composedMessage;
 
+  console.log(req.user)
+
   if (!channelName) {
     res.status(422).json({
       error: 'Enter a valid channel name.'
@@ -83,12 +85,32 @@ exports.postToChannel = function(req, res, next) {
       res.send({ error: err });
       return next(err);
     }
+    console.log("req guest", req.user)
 
+    // Tells mongodb which to schema to reference
+    const checkAuthor = () => {
+      if (req.user.username) {
+        let author = {
+          kind: 'User',
+          item: req.user._id
+        }
+        return author;
+      } else {
+        let guestAuthor = {
+          kind: 'Guest',
+          item: req.user._id
+        }
+        return guestAuthor;
+      }
+    }
+
+   
     const post = new Message({
       conversationId: postToChannel._id,
       body: composedMessage,
-      author: req.user._id,
-      channelName
+      author: [ checkAuthor() ],
+      channelName,
+      guestPost: req.user.guestName || ""
     });
 
     post.save(function(err, newPost) {
@@ -112,12 +134,9 @@ exports.getChannelConversations = function(req, res, next) {
   const channelName = req.params.channelName;
 
   Message.find({ channelName })
-    .select('createdAt body author')
+    .select('createdAt body author guestPost')
     .sort('-createdAt')
-    .populate({
-      path: 'author',
-      select: 'username'
-    })
+    .populate('author.item')
     .exec((err, messages) => {
       if (err) {
         res.send({ error: err });

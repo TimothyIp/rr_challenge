@@ -1,5 +1,6 @@
 const passport = require('passport'),
       User = require('../models/user'),
+      Guest = require('../models/guest'),
       config = require('./main'),
       JwtStrategy = require('passport-jwt').Strategy,
       ExtractJwt = require('passport-jwt').ExtractJwt,
@@ -55,7 +56,17 @@ const jwtLogin = new JwtStrategy(jwtOptions, function(payload, done) {
     if (user) {
       done(null, user);
     } else {
-      done(null, false);
+      Guest.findOne(payload.guestName, function(err, guest) {
+        if (err) {
+          return done(err, false);
+        }
+
+        if (guest) {
+          done(null, guest)
+        } else {
+          done(null, false);
+        }
+      });
     }
   });
 });

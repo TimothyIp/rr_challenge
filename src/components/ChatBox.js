@@ -46,7 +46,7 @@ const ChatBox = (props) => {
                       return (
                         <li key={`chatMsgId-${index}`}>
                           <p>{message.body}</p>
-                          <p>{message.author.username}</p>
+                          <p>Posted by: {message.author[0].item.username || message.author[0].item.guestName}</p>
                           <p>{Moment(message.createdAt).fromNow()}</p>
                         </li>
                       )
