@@ -7,9 +7,8 @@ export default class ChatLists extends Component {
   }
 
   componentDidMount() {
-    
+
     // Gets most recent conversations
-    this.props.hasToken();
     this.props.getUsersConversations();
   }
 

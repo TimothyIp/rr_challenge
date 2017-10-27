@@ -6,11 +6,11 @@
     "axios": "^0.17.0",
     "moment": "^2.19.1",
     "react": "^16.0.0",
+    "react-cookie": "^2.1.1",
     "react-dom": "^16.0.0",
     "react-router": "^4.2.0",
     "react-scripts": "1.0.14",
-    "socket.io-client": "^2.0.4",
-    "universal-cookie": "^2.1.0"
+    "socket.io-client": "^2.0.4"
   },
   "scripts": {
     "start": "concurrently 'npm run react' 'npm run server'",

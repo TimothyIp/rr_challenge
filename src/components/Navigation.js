@@ -1,12 +1,21 @@
 import React from 'react';
 
 const Navigation = (props) => {
-  const { displayForms, id, userLogout, username } = props;
+  const { displayForms, id, userLogout, username, guestUsername } = props;
 
   return (
     <div>
       <div>
-        Chat Navigation - Logged in as {username}
+        Chat Navigation {
+          (username)
+            ? <span>Logged in as {username}</span>
+            : null
+        }
+        {
+          (guestUsername)
+            ? <span>Logged in as Guest-{guestUsername}</span>
+            : null
+        }
       </div>
       {
         (id)

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import LoginForm from '../LoginForm';
 import RegisterForm from '../RegisterForm';
-import Cookies from 'universal-cookie';
+import { withCookies, Cookies } from 'react-cookie'
 import axios from 'axios';
 import Navigation from '../Navigation';
 import ChatBox from '../ChatBox';
@@ -10,12 +10,9 @@ import io from 'socket.io-client';
 
 
 const API_URL = 'http://localhost:3000/api';
-const cookies = new Cookies();
-const token = cookies.get('token');
-const tokenUser = cookies.get('user');
 const SOCKET_URL = "http://localhost:3000";
 
-export default class ChatUIContainer extends Component {
+class ChatUIContainer extends Component {
   constructor(){
     super();
     
@@ -47,19 +44,32 @@ export default class ChatUIContainer extends Component {
   }
 
   componentDidMount() {
-    // Logs user in if they have a token after refreshing or revisiting page.
+    // Logs user or guest in if they have a token after refreshing or revisiting page.
     this.hasToken();
-    console.log("token", tokenUser, token)
+    // console.log("token", tokenUser, token)
 
+    
     // Get current channels messages
     this.getChannelConversations();
   }
 
   hasToken = () => {
+    const { cookies } = this.props;
+    const token = cookies.get('token');
+    const guestToken = cookies.get('guestToken');
+    const tokenUser = cookies.get('user');
+    const tokenGuestUser = cookies.get('guestUser');
+
     if (token) {
       this.setState({
         username: tokenUser.username,
+        guestUsername: "",
         id: tokenUser._id,
+        token
+      });
+    } else if (guestToken) {
+      this.setState({
+        guestUsername: tokenGuestUser,
         token
       });
     }
@@ -77,17 +87,18 @@ export default class ChatUIContainer extends Component {
   }
 
   async userLogin({ username, password }) {
+    const { cookies } = this.props;
     try {
       const userData = await axios.post(`${API_URL}/auth/login`, { username, password });
       cookies.set('token', userData.data.token, { path: "/" })
       cookies.set('user', userData.data.user, { path: "/" })
       this.setState({
+        guestUsername:"",
         username: userData.data.user.username,
-        id: userData.data.user._id,
-        loginError:[],
         formsShown: false,
         token: userData.data.token,
-        guestUsername:""
+        id: userData.data.user._id,
+        loginError:[]
       });
     } catch(error) {
         // Always show most recent errors
@@ -102,17 +113,27 @@ export default class ChatUIContainer extends Component {
     }
   }
 
+  componentWillUnmount() {
+    console.log('unmounted')
+    console.log()
+  }
+
   userLogout = () => {
+    const { cookies } = this.props;
     cookies.remove('token', { path: '/' });
     cookies.remove('user', { path: '/' });
+    cookies.remove('guestToken', { path: "/" })
+    cookies.remove('guestUser', { path: "/" })
     this.setState({
       username: "",
       id: "",
+      guestUsername: "",
       socket: null
     });
   }
 
   userRegistration = ({ username, password }) => {
+    const { cookies } = this.props;
     axios.post(`${API_URL}/auth/register`, { username, password })
     .then(res => {
       console.log(res);
@@ -123,8 +144,9 @@ export default class ChatUIContainer extends Component {
         username: res.data.username,
         id: res.data.user._id,
         registrationError:[],
+        token:res.data.token,
         formsShown: false,
-        guestUsername:""
+        guestUsername:"",
       });
     })
     .catch(error => {
@@ -208,11 +230,14 @@ export default class ChatUIContainer extends Component {
 
   async guestLogin(e) {
     e.preventDefault();
+    const { cookies } = this.props;
     const guestInputName = this.state.guestSignup;
     
     try {
       const guestInfo = await axios.post(`${API_URL}/auth/guest`, { guestInputName })
       console.log(guestInfo)
+      cookies.set('guestToken', guestInfo.data.token, { path: "/" })
+      cookies.set('guestUser', guestInfo.data.guestUser.guest.guestName, { path: "/" })
       this.setState({
         guestUsername: guestInfo.data.guestUser.guest.guestName,
         token: guestInfo.data.token,
@@ -304,3 +329,5 @@ export default class ChatUIContainer extends Component {
     )
   }
 }
+
+export default withCookies(ChatUIContainer);
