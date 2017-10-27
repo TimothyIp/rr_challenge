@@ -21,6 +21,8 @@ module.exports = function(app) {
 
         authRoutes.post('/login', requireLogin, AuthenticationController.login);
 
+        authRoutes.post('/guest', AuthenticationController.guestSignup);
+
         // Chat Routes
         apiRoutes.use('/chat', chatRoutes)
 

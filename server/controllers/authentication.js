@@ -2,6 +2,7 @@
 
 const jwt = require('jsonwebtoken'),
       User = require('../models/user'),
+      Guest = require('../models/guest'),
       config = require('../config/main');
 
 function generateToken(user) {
@@ -13,8 +14,7 @@ function generateToken(user) {
 function setUserInfo(req) {
   return {
     _id: req._id,
-    username: req.username,
-    role: req.role,
+    username: req.username
   }
 }
 
@@ -70,36 +70,66 @@ exports.register = function(req, res, next) {
 
       let userInfo = setUserInfo(user);
 
-      res.status(201).json({
+      res.status(200).json({
         token: 'JWT ' + generateToken(userInfo),
         user: userInfo,
-        message: "Successfully created your account"
+        message: "Successfully created your account."
       });
     });
   });
 }
 
-// Role authorization check
-exports.roleAuthorization = function(role) {
-  return function(req, res, next) {
-    const user = req.user;
+// Guest login route
+exports.guestSignup = function(req, res, next) {
+  const guestName = req.body.guestInputName;
 
-    User.findById(user._id, function(err, foundUser) {
-      if (err) {
-        res.status(422).json({
-          error: 'No user was found.'
-        })
-      }
-
-      if (foundUser.role == role) {
-        return next();
-      }
-
-      res.status(401).json({
-        error: 'You are not authorized to view this content.'
-      });
-
-      return next('Unauthorized');
-    })
+  if (!guestName) {
+    return res.status(422).json({
+      error: 'You must enter a username.'
+    });
   }
+
+  // Looks for existing guest name in database
+  Guest.findOne({ guestName }, function(err, existingGuest) {
+    if (err) {
+      return next(err);
+    }
+
+    if (existingGuest) {
+      return res.status(422).send({
+        error: 'That Guest name is already taken.'
+      })
+    }
+
+    let guest = new Guest({
+      guestName
+    });
+
+    // Checks against Usernames
+    User.findOne({ username: guestName}, function(err, existingUser) {
+      if (err) {
+        return next(err);
+      }
+
+      if (existingUser) {
+        return res.status(422).send({
+          error: 'That Guest name is already taken.'
+        })
+      } else {
+        guest.save(function(err, user) {
+          if (err) {
+            return next(err);
+          }
+    
+          res.status(200).json({
+            token: 'JWT ' + generateToken({guest}),
+            guestUser: {guest},
+            message: 'Sucessfully created a guest account'
+          })
+    
+        });
+      }
+    });
+
+  });
 }

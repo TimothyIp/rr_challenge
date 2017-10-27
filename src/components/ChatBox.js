@@ -23,7 +23,7 @@ const ChatBox = (props) => {
     width: "50%"
   }
 
-  const { handleSubmit, handleChange, currentChannel, channelConversations, id, getUsersConversations } = props;
+  const { handleSubmit, handleChange, currentChannel, channelConversations, id, getUsersConversations, hasToken } = props;
 
   return (
       <div style={layoutContainer}>
@@ -31,6 +31,7 @@ const ChatBox = (props) => {
           (id)
           ? <ChatLists 
               getUsersConversation={getUsersConversations}
+              hasToken={hasToken}
               {...props}
               />
             : null
