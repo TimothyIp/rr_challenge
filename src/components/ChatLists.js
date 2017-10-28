@@ -18,28 +18,47 @@ export default class ChatLists extends Component {
       width: "50%"
     }
   
-    const { conversations } = this.props;
+    const { conversations, usersChannels } = this.props;
   
     return (
       <div style={messageList}>
-        <h3>Current Conversations</h3>
+        <h3>User Panel</h3>
         <div style={messageList}>
-        {
-            (conversations.length)
-              ? <ul>
-                  {conversations.map((conversation, index) => {
+        <div>
+          <p>Channels</p>
+          {
+            (usersChannels)
+              ? <ul> 
+                  {usersChannels.map((channel, index) => {
                     return(
-                      <li key={`convoId-${index}`}>
-                        <p>{conversation[0].body}</p>
-                        <p>{conversation[0].author.username}</p>
-                        <p>{Moment(conversation[0].createdAt).fromNow()}</p>
-                        <p>Posted in {conversation[0].channelName || "Private Message"}</p>
+                      <li key={`usersChannelId-${index}`}>
+                        <p>{channel}</p>
                       </li>
                     )
                   })}
                 </ul>
-              : <p>No Active Conversations</p>
+              : null
           }
+        </div>
+        <div>
+          <p>Private Messages</p>
+          {
+              (conversations)
+                ? <ul>
+                    {conversations.map((conversation, index) => {
+                      return(
+                        <li key={`convoId-${index}`}>
+                          <p>{conversation[0].body}</p>
+                          <p>{conversation[0].author.username}</p>
+                          <p>{Moment(conversation[0].createdAt).fromNow()}</p>
+                          <p>Posted in {conversation[0].channelName || "Private Message"}</p>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                : <p>No Active Conversations</p>
+            }
+        </div>
         </div>
       </div>
     )

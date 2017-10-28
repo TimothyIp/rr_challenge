@@ -12,7 +12,7 @@ const ChatBox = (props) => {
   }
 
   const messageBox = {
-    width: "720px",
+    width: "100%",
     height: "590px",
     border: "1px solid black",
     overflow: "scroll"

@@ -14,6 +14,10 @@ const UserSchema = new Schema({
   },
   messages: {
     type: String
+  },
+  usersChannels: {
+    type: Array,
+    default: ['Public-Main']
   }
 },
 {

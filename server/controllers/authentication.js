@@ -14,7 +14,8 @@ function generateToken(user) {
 function setUserInfo(req) {
   return {
     _id: req._id,
-    username: req.username
+    username: req.username,
+    usersChannels: req.usersChannels
   }
 }
 

@@ -39,6 +39,7 @@ class ChatUIContainer extends Component {
       guestUsername: "",
       socketConversations: [],
       channelUsers: [],
+      usersChannels: [],
       token:""
     }
   }
@@ -48,13 +49,14 @@ class ChatUIContainer extends Component {
   }
 
   componentDidMount() {
-    const currentChannel = this.state.currentChannel;  
     // Logs user or guest in if they have a token after refreshing or revisiting page.
     this.hasToken();
     // console.log("token", tokenUser, token)
 
+    const currentChannel = this.state.currentChannel;
+
     socket.on('connect', () => {
-      socket.emit('enter channel', currentChannel, this.setUsername());
+      socket.emit('enter channel', currentChannel, this.setUsername())
     })
 
     socket.on('user joined', (data) => {
@@ -93,13 +95,15 @@ class ChatUIContainer extends Component {
     const guestToken = cookies.get('guestToken');
     const tokenUser = cookies.get('user');
     const tokenGuestUser = cookies.get('guestUser');
+    const usersChannels = cookies.get('usersChannels');
 
     if (token) {
       this.setState({
         username: tokenUser.username,
         guestUsername: "",
         id: tokenUser._id,
-        token
+        token,
+        usersChannels
       });
     } else if (guestToken) {
       this.setState({
@@ -132,17 +136,24 @@ class ChatUIContainer extends Component {
 
   async userLogin({ username, password }) {
     const { cookies } = this.props;
+    const currentChannel = this.state.currentChannel;  
+    
     try {
       const userData = await axios.post(`${API_URL}/auth/login`, { username, password });
-      cookies.set('token', userData.data.token, { path: "/" })
-      cookies.set('user', userData.data.user, { path: "/" })
+      cookies.set('token', userData.data.token, { path: "/" });
+      cookies.set('user', userData.data.user, { path: "/" });
+      cookies.set('usersChannels', userData.data.user.usersChannels, { path: "/" });
+      
       this.setState({
         guestUsername:"",
         username: userData.data.user.username,
         formsShown: false,
         token: userData.data.token,
         id: userData.data.user._id,
-        loginError:[]
+        loginError:[],
+        usersChannels: userData.data.user.usersChannels
+      }, () => {
+        socket.emit('enter channel', currentChannel, this.setUsername());   
       });
     } catch(error) {
         // Always show most recent errors
@@ -163,6 +174,7 @@ class ChatUIContainer extends Component {
     cookies.remove('user', { path: '/' });
     cookies.remove('guestToken', { path: "/" })
     cookies.remove('guestUser', { path: "/" })
+
     this.setState({
       username: "",
       id: "",
@@ -173,6 +185,8 @@ class ChatUIContainer extends Component {
 
   userRegistration = ({ username, password }) => {
     const { cookies } = this.props;
+    const currentChannel = this.state.currentChannel;
+
     axios.post(`${API_URL}/auth/register`, { username, password })
     .then(res => {
       console.log(res);
@@ -186,6 +200,9 @@ class ChatUIContainer extends Component {
         token:res.data.token,
         formsShown: false,
         guestUsername:"",
+        usersChannels: res.data.user.usersChannels
+      }, () => {
+        socket.emit('enter channel', currentChannel, this.setUsername());           
       });
     })
     .catch(error => {
@@ -199,6 +216,36 @@ class ChatUIContainer extends Component {
         registrationError: errorLog
       });
     });
+  }
+
+  async guestLogin(e) {
+    e.preventDefault();
+    const { cookies } = this.props;
+    const guestInputName = this.state.guestSignup;
+    const currentChannel = this.state.currentChannel;
+    
+    try {
+      const guestInfo = await axios.post(`${API_URL}/auth/guest`, { guestInputName })
+      console.log(guestInfo)
+      cookies.set('guestToken', guestInfo.data.token, { path: "/" })
+      cookies.set('guestUser', guestInfo.data.guestUser.guest.guestName, { path: "/" })
+
+      this.setState({
+        guestUsername: guestInfo.data.guestUser.guest.guestName,
+        token: guestInfo.data.token,
+        loginError: []
+      }, () => {
+        socket.emit('enter channel', currentChannel, this.setUsername());           
+      })      
+    } catch(error) {
+      const guestError = Array.from(this.state.loginError);
+      console.log("guest login error", guestInputName)
+      guestError.push(error);
+
+      this.setState({
+        loginError: guestError
+      })
+    }
   }
 
   getChannelConversations = () => {
@@ -279,32 +326,6 @@ class ChatUIContainer extends Component {
     e.preventDefault();
 
     this.sendMessage(this.state.composedMessage);
-  }
-
-  async guestLogin(e) {
-    e.preventDefault();
-    const { cookies } = this.props;
-    const guestInputName = this.state.guestSignup;
-    
-    try {
-      const guestInfo = await axios.post(`${API_URL}/auth/guest`, { guestInputName })
-      console.log(guestInfo)
-      cookies.set('guestToken', guestInfo.data.token, { path: "/" })
-      cookies.set('guestUser', guestInfo.data.guestUser.guest.guestName, { path: "/" })
-      this.setState({
-        guestUsername: guestInfo.data.guestUser.guest.guestName,
-        token: guestInfo.data.token,
-        loginError: []
-      })      
-    } catch(error) {
-      const guestError = Array.from(this.state.loginError);
-      console.log("guest login error", guestInputName)
-      guestError.push(error);
-
-      this.setState({
-        loginError: guestError
-      })
-    }
   }
 
   displayForms = (method) => {
