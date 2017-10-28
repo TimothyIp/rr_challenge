@@ -23,7 +23,7 @@ const ChatBox = (props) => {
     width: "50%"
   }
 
-  const { handleSubmit, handleChange, currentChannel, channelConversations, id, getUsersConversations, hasToken } = props;
+  const { handleSubmit, handleChange, currentChannel, channelConversations, id, getUsersConversations, hasToken, socketConversations, composedMessage, channelUsers } = props;
 
   return (
       <div style={layoutContainer}>
@@ -54,9 +54,26 @@ const ChatBox = (props) => {
                   </ul>
                 : <p>Nothing has been posted in this channel yet.</p>
             }
+            {
+              (socketConversations)
+                ? <ul>
+                    {socketConversations.map((message, index) => {
+                      return (
+                        <li key={`socketMsgId-${index}`}>
+                          <p>{message.composedMessage}</p>
+                          <p>{message.author}</p>
+                          <p>{message.userJoined}</p>
+                          <p>{Moment(message.date).fromNow()}</p>
+                        </li>
+                        
+                      )
+                    })}
+                  </ul>
+                : null
+            }
           </div>
           <form onSubmit={handleSubmit}>
-            <input onChange={handleChange} name="composedMessage" type="text" autoComplete="off"/>
+            <input onChange={handleChange} value={composedMessage} name="composedMessage" type="text" autoComplete="off"/>
             <button>Send</button>
           </form>
         </div>

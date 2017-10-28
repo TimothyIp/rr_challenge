@@ -3,20 +3,20 @@ exports = module.exports = function(io) {
   io.on('connection', (socket)=> {
     console.log('a user has connected');
 
-    socket.on('enter a conversation', (conversation) => {
-      socket.join(conversation);
-      console.log('user has joined conversation' , conversation)
+    socket.on('enter channel', (channel, username) => {
+      socket.join(channel);
+      io.sockets.in(channel).emit('user joined', `${username} has joined the channel`)
+      console.log('user has joined channel' , channel, username)
     });
 
-    socket.on('leave conversation', (conversation) => {
-      socket.leave(conversation);
-      console.log('user has left conversation')
+    socket.on('leave channel', (channel) => {
+      socket.leave(channel);
+      console.log('user has left channel')
     });
-
-
     
-    socket.on('new message', (conversation) => {
-      io.sockets.in(conversation).emit('refresh messages', conversation);
+    socket.on('new message', (socketMsg) => {
+      io.sockets.in(socketMsg.channel).emit('refresh messages', socketMsg);
+      console.log('new message received in channel', socketMsg)
     });
 
     socket.on('disconnect', () => {

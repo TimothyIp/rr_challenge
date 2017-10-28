@@ -2,7 +2,8 @@
 
 const Conversation = require('../models/conversation'),
       Message = require('../models/message'),
-      User = require('../models/user');
+      User = require('../models/user'),
+      Channel = require('../models/channel');
 
 exports.newConversation = function(req, res, next) {
 
@@ -72,23 +73,21 @@ exports.postToChannel = function(req, res, next) {
   if (!composedMessage) {
     res.status(422).json({
       error: 'Please enter a message.'
-    })
+    });
   }
 
-  const conversation = new Conversation({
-    participants: [req.user._id],
+  const channel = new Channel({
     channelName
   });
 
-  conversation.save(function(err, postToChannel) {
+  channel.save(function(err, channelPost) {
     if (err) {
       res.send({ error: err });
       return next(err);
     }
-    console.log("req guest", req.user)
 
-    // Tells mongodb which to schema to reference
-    const checkAuthor = () => {
+  // Tells mongodb which to schema to reference a guest or user collection
+   const checkAuthor = () => {
       if (req.user.username) {
         let author = {
           kind: 'User',
@@ -102,11 +101,10 @@ exports.postToChannel = function(req, res, next) {
         }
         return guestAuthor;
       }
-    }
+    };
 
-   
     const post = new Message({
-      conversationId: postToChannel._id,
+      conversationId: channelPost._id,
       body: composedMessage,
       author: [ checkAuthor() ],
       channelName,
@@ -121,13 +119,11 @@ exports.postToChannel = function(req, res, next) {
 
       res.status(200).json({
         message: `Posted to channel ${channelName}`,
-        conversationId: conversation._id,
+        conversationId: newPost._id,
         postedMessage: composedMessage
       })
     });
-
-  });
-
+  })
 }
 
 exports.getChannelConversations = function(req, res, next) {
@@ -143,8 +139,11 @@ exports.getChannelConversations = function(req, res, next) {
         return next(err);
       }
 
+      // Reversed the array so you get most recent messages on the button
+      const getRecent = messages.reverse();
+
       return res.status(200).json({
-        channelMessages: messages
+        channelMessages: getRecent
       })
     })
 }

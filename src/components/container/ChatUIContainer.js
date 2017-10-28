@@ -7,10 +7,12 @@ import Navigation from '../Navigation';
 import ChatBox from '../ChatBox';
 import ChatSelector from '../ChatSelector';
 import io from 'socket.io-client';
+import Moment from 'moment';
 
 
 const API_URL = 'http://localhost:3000/api';
 const SOCKET_URL = "http://localhost:3000";
+const socket = io(SOCKET_URL);
 
 class ChatUIContainer extends Component {
   constructor(){
@@ -35,6 +37,8 @@ class ChatUIContainer extends Component {
       channelConversations: [],
       guestSignup: "",
       guestUsername: "",
+      socketConversations: [],
+      channelUsers: [],
       token:""
     }
   }
@@ -44,14 +48,44 @@ class ChatUIContainer extends Component {
   }
 
   componentDidMount() {
+    const currentChannel = this.state.currentChannel;  
     // Logs user or guest in if they have a token after refreshing or revisiting page.
     this.hasToken();
     // console.log("token", tokenUser, token)
 
-    
+    socket.on('connect', () => {
+      socket.emit('enter channel', currentChannel, this.setUsername());
+    })
+
+    socket.on('user joined', (data) => {
+      const channelUsers = Array.from(this.state.channelUsers);
+      const userJoined = Array.from(this.state.socketConversations);
+      channelUsers.push(data);
+
+      userJoined.push({
+        userJoined: data
+      })
+
+      this.setState({
+        channelUsers,
+        socketConversations: userJoined
+      })
+    })
+
+    socket.on('refresh messages', (data) => {
+      console.log('received refresh socket', data)
+      const newSocketConversations = Array.from(this.state.socketConversations);
+      newSocketConversations.push(data)
+      this.setState({
+        socketConversations: newSocketConversations
+      })
+    })
+
     // Get current channels messages
     this.getChannelConversations();
   }
+
+
 
   hasToken = () => {
     const { cookies } = this.props;
@@ -70,14 +104,24 @@ class ChatUIContainer extends Component {
     } else if (guestToken) {
       this.setState({
         guestUsername: tokenGuestUser,
-        token
+        token: guestToken
       });
     }
   };
 
-  initSocket = () => {
-    const socket = io(SOCKET_URL);
+  // Checks username, then return whether a username or guestname
+  setUsername = () => {
+    const username = this.state.username;
+    const guestUsername = this.state.guestUsername;
 
+    if (!username) {
+      return guestUsername
+    } else {
+      return username
+    }
+  }
+
+  initSocket = () => {
     socket.on('connect', () => {
       console.log('Connected', socket.id);
       this.setState({
@@ -111,11 +155,6 @@ class ChatUIContainer extends Component {
           loginError: errorLog
         });
     }
-  }
-
-  componentWillUnmount() {
-    console.log('unmounted')
-    console.log()
   }
 
   userLogout = () => {
@@ -190,6 +229,7 @@ class ChatUIContainer extends Component {
 
   sendMessage = (composedMessage, recipient) => {
     const socket = this.state.socket;
+    const currentChannel = this.state.currentChannel;
 
     // If the message is not a private one, post it to the channel instead of recipient
     if (!this.state.privateMessage) {
@@ -198,7 +238,17 @@ class ChatUIContainer extends Component {
         headers: { Authorization: this.state.token }
       })
       .then(res => {
+        const socketMsg = {
+          composedMessage,
+          channel: currentChannel,
+          author: this.state.username || this.state.guestUsername,
+          date: Moment().format()
+        }
+        socket.emit('new message', socketMsg)
         console.log(res)
+        this.setState({
+          composedMessage: ""
+        })
       })
       .catch(err => {
         console.log(err)
@@ -209,6 +259,9 @@ class ChatUIContainer extends Component {
       })
       .then(res => {
         console.log(res)
+        this.setState({
+          composedMessage: "",
+        })
       })
       .catch(err => {
         console.log(err)
