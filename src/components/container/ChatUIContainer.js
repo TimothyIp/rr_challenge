@@ -44,20 +44,39 @@ class ChatUIContainer extends Component {
     }
   }
 
-  componentWillMount() {
-    this.initSocket();
-  }
-
   componentDidMount() {
+    
     // Logs user or guest in if they have a token after refreshing or revisiting page.
     this.hasToken();
-    // console.log("token", tokenUser, token)
+    
+    // Get current channels messages
+    this.getChannelConversations();
+    
+    this.initSocket();    
+  }
 
+  initSocket = () => {
     const currentChannel = this.state.currentChannel;
 
-    // socket.on('connect', () => {
-    //   socket.emit('enter channel', currentChannel, this.setUsername())
-    // })
+    this.setState({
+        socket
+      })
+
+    socket.on('connect', () => {
+      console.log('Connected', socket.id);
+      socket.emit('enter channel', currentChannel, this.setUsername())
+    });
+
+    socket.on('refresh messages', (data) => {
+      console.log('received refresh socket', data)
+      const newSocketConversations = Array.from(this.state.socketConversations);
+      
+      newSocketConversations.push(data)
+
+      this.setState({
+        socketConversations: newSocketConversations
+      })
+    });
 
     socket.on('user joined', data => {
       const userJoined = Array.from(this.state.socketConversations);
@@ -72,17 +91,19 @@ class ChatUIContainer extends Component {
       })
     });
 
-    socket.on('refresh messages', (data) => {
-      console.log('received refresh socket', data)
-      const newSocketConversations = Array.from(this.state.socketConversations);
-      newSocketConversations.push(data)
-      this.setState({
-        socketConversations: newSocketConversations
+    socket.on('user left', data => {
+      const userJoined = Array.from(this.state.socketConversations);
+      
+      userJoined.push({
+        userJoined: data
       })
-    })
 
-    // Get current channels messages
-    this.getChannelConversations();
+      this.setState({
+        socketConversations: userJoined
+      })      
+    });
+
+    socket.emit('enter channel', currentChannel, this.setUsername())    
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -91,8 +112,6 @@ class ChatUIContainer extends Component {
       socket.emit('leave channel', prevState.currentChannel, this.setUsername())
     }
   }
-
-
 
   hasToken = () => {
     const { cookies } = this.props;
@@ -110,7 +129,7 @@ class ChatUIContainer extends Component {
         id: tokenUser._id,
         token,
         usersChannels,
-        currentChannel
+        currentChannel: currentChannel || "Public-Main"
       });
     } else if (guestToken) {
       this.setState({
@@ -130,19 +149,6 @@ class ChatUIContainer extends Component {
     } else {
       return username
     }
-  }
-
-  initSocket = () => {
-    const currentChannel = this.state.currentChannel;
-
-    socket.on('connect', () => {
-      console.log('Connected', socket.id);
-      socket.emit('enter channel', currentChannel, this.setUsername())
-      
-      this.setState({
-        socket
-      })
-    })
   }
 
   async userLogin({ username, password }) {
@@ -183,13 +189,16 @@ class ChatUIContainer extends Component {
 
   userLogout = () => {
     const { cookies } = this.props;
+    const currentChannel = this.state.currentChannel;
     cookies.remove('token', { path: '/' });
     cookies.remove('user', { path: '/' });
     cookies.remove('guestToken', { path: "/" });
     cookies.remove('guestUser', { path: "/" });
     cookies.remove('usersChannels', { path: "/" });
     cookies.remove('channel', { path: "/" });
-
+    
+    socket.emit('leave channel', currentChannel, this.setUsername())      
+    
     this.setState({
       username: "",
       id: "",
@@ -197,6 +206,7 @@ class ChatUIContainer extends Component {
       socket: null,
       token: "",
       usersChannels: [],
+      socketConversations: [],      
       currentChannel: "Public-Main"
     });
   }
@@ -210,9 +220,10 @@ class ChatUIContainer extends Component {
       console.log(res);
       cookies.set('token', res.data.token, { path: "/" })
       cookies.set('user', res.data.user, { path: "/" })
+      cookies.set('usersChannels', res.data.user.usersChannels, { path: "/" })
 
       this.setState({
-        username: res.data.username,
+        username: res.data.user.username,
         id: res.data.user._id,
         registrationError:[],
         token:res.data.token,
@@ -271,18 +282,6 @@ class ChatUIContainer extends Component {
     .then(res => {
       this.setState({
         channelConversations: res.data.channelMessages
-      }, () => {
-        socket.on('user left', data => {
-          const userJoined = Array.from(this.state.socketConversations);
-          
-          userJoined.push({
-            userJoined: data
-          })
-    
-          this.setState({
-            socketConversations: userJoined
-          })      
-        })
       });
     })
     .catch(error => {
@@ -361,6 +360,7 @@ class ChatUIContainer extends Component {
   createChannel = (e) => {
     const { cookies } = this.props;
     const createInput = this.state.createInput;
+    const currentChannel = this.state.currentChannel;
     e.preventDefault();
 
     axios.post(`${API_URL}/user/addchannel`, { createInput }, {
@@ -374,8 +374,11 @@ class ChatUIContainer extends Component {
       updatedUsersChannels.push(this.state.createInput);
 
       cookies.set('usersChannels', updatedUsersChannels, { path: "/" });
-      
+
+      socket.emit('enter channel', currentChannel, this.setUsername())
+
       this.setState({
+        socketConversations:[],
         currentChannel: createInput,
         usersChannels: updatedUsersChannels
       }, () => {this.getChannelConversations()})
@@ -396,7 +399,9 @@ class ChatUIContainer extends Component {
 
       cookies.set('usersChannels', updatedChannels, { path: "/" });
       
+      this.joinChannel("Public-Main");
       this.setState({
+        socketConversations: [],        
         usersChannels: updatedChannels
       })
     })
@@ -413,6 +418,7 @@ class ChatUIContainer extends Component {
     socket.emit('enter channel', channel, this.setUsername())
     
     this.setState({
+      socketConversations: [],      
       currentChannel: channel
     }, () => {this.getChannelConversations()})
   }
@@ -425,14 +431,14 @@ class ChatUIContainer extends Component {
       });
     }
 
-    if(method === "register") {
+    if (method === "register") {
       this.setState({
         formsMethod: "register",
         formsShown: true
       });
     }
 
-    if(method === "close") {
+    if (method === "close") {
       this.setState({
         formsMethod: "",
         formsShown: false
@@ -444,6 +450,13 @@ class ChatUIContainer extends Component {
     this.setState({
       formsShown: false
     });
+  }
+
+  componentWillUnmount() {
+    socket.off('refresh messages');
+    socket.off('user joined');
+    socket.off('user left');
+    socket.off('connect');
   }
 
   render() {

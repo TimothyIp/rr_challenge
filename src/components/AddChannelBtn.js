@@ -32,7 +32,6 @@ closeMenu = () => {
               </div>
             : <button onClick={this.handleClick}>Add</button>
         }
-
       </div>
     )
   }

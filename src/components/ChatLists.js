@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Moment from 'moment';
 import AddChannelBtn from './AddChannelBtn';
+import AddDMBtn from './AddDMBtn';
 
 export default class ChatLists extends Component {
   constructor() {
