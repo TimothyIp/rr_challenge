@@ -8,7 +8,6 @@ export default class ChatLists extends Component {
   }
 
   componentDidMount() {
-
     // Gets most recent conversations
     this.props.getUsersConversations();
   }
@@ -19,7 +18,7 @@ export default class ChatLists extends Component {
       width: "50%"
     }
   
-    const { conversations, usersChannels, handleChange, handleSubmit, createChannel, removeChannel } = this.props;
+    const { conversations, usersChannels, handleChange, handleSubmit, createChannel, removeChannel, joinChannel } = this.props;
   
     return (
       <div style={messageList}>
@@ -31,7 +30,6 @@ export default class ChatLists extends Component {
             handleChange={handleChange}
             handleSubmit={handleSubmit}
             createChannel={createChannel}
-            removeChannel={removeChannel}
           />
           {
             (usersChannels)
@@ -39,10 +37,10 @@ export default class ChatLists extends Component {
                   {usersChannels.map((channel, index) => {
                     return(
                       <li key={`usersChannelId-${index}`}>
-                        <p>{channel}</p>
+                        <div onClick={() => {joinChannel(channel)}}>{channel}</div>
                         {
                           (channel !== "Public-Main")
-                            ? <button>Remove</button>
+                            ? <button onClick={() => {removeChannel(channel)}}>Remove</button>
                             : null
                         }
                       </li>

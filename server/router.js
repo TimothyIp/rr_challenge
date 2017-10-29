@@ -52,9 +52,11 @@ module.exports = function(app) {
         // Gets user's joined channels
         userRoutes.get('/getchannels', requireAuth, UserController.getChannels);
 
-        // Edit User Details like channels
+        // Add to user's channels
         userRoutes.post('/addchannel', requireAuth, UserController.addChannel);
 
+        // Remove from user's channels
+        userRoutes.post('/removechannel', requireAuth, UserController.removeChannel)
 
         // Set URL for API groups
         app.use('/api', apiRoutes);
