@@ -40,6 +40,7 @@ class ChatUIContainer extends Component {
       socketConversations: [],
       channelUsers: [],
       usersChannels: [],
+      createInput: "",
       token:""
     }
   }
@@ -144,6 +145,8 @@ class ChatUIContainer extends Component {
       cookies.set('user', userData.data.user, { path: "/" });
       cookies.set('usersChannels', userData.data.user.usersChannels, { path: "/" });
       
+      console.log(userData)
+
       this.setState({
         guestUsername:"",
         username: userData.data.user.username,
@@ -172,14 +175,17 @@ class ChatUIContainer extends Component {
     const { cookies } = this.props;
     cookies.remove('token', { path: '/' });
     cookies.remove('user', { path: '/' });
-    cookies.remove('guestToken', { path: "/" })
-    cookies.remove('guestUser', { path: "/" })
+    cookies.remove('guestToken', { path: "/" });
+    cookies.remove('guestUser', { path: "/" });
+    cookies.remove('usersChannels', { path: "/" });
 
     this.setState({
       username: "",
       id: "",
       guestUsername: "",
-      socket: null
+      socket: null,
+      token: "",
+      usersChannels: []
     });
   }
 
@@ -226,7 +232,7 @@ class ChatUIContainer extends Component {
     
     try {
       const guestInfo = await axios.post(`${API_URL}/auth/guest`, { guestInputName })
-      console.log(guestInfo)
+
       cookies.set('guestToken', guestInfo.data.token, { path: "/" })
       cookies.set('guestUser', guestInfo.data.guestUser.guest.guestName, { path: "/" })
 
@@ -239,7 +245,7 @@ class ChatUIContainer extends Component {
       })      
     } catch(error) {
       const guestError = Array.from(this.state.loginError);
-      console.log("guest login error", guestInputName)
+
       guestError.push(error);
 
       this.setState({
@@ -328,6 +334,33 @@ class ChatUIContainer extends Component {
     this.sendMessage(this.state.composedMessage);
   }
 
+  createChannel = (e) => {
+    const createInput = this.state.createInput;
+    e.preventDefault();
+
+    axios.post(`${API_URL}/user/addchannel`, {createInput}, {
+      headers: { Authorization: this.state.token }
+    })
+    .then(res => {
+      console.log(res)
+      
+      const updatedUsersChannels = Array.from(this.state.usersChannels);
+
+      updatedUsersChannels.push(this.state.createInput);
+
+      this.setState({
+        usersChannels: updatedUsersChannels
+      })
+    })
+    .catch(err => {
+      console.log(err)
+    })
+  }
+
+  removeChannel = (channel) => {
+    console.log("REMOVING CHANNEL: ", channel)
+  }
+
   displayForms = (method) => {
     if (method === "login") {
       this.setState({
@@ -389,6 +422,8 @@ class ChatUIContainer extends Component {
             ? <ChatBox 
                 handleChange={this.handleChange}
                 handleSubmit={this.handleSubmit}
+                createChannel={this.createChannel}
+                removeChannel={this.removeChannel}
                 getUsersConversations={this.getUsersConversations}
                 hasToken={this.hasToken}
                 {...this.state}

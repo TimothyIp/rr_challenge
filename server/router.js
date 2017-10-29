@@ -2,7 +2,8 @@ const AuthenticationController = require('./controllers/authentication'),
       express = require('express'),
       passportService = require('./config/passport'),
       passport = require('passport'),
-      ChatController = require('./controllers/chat');
+      ChatController = require('./controllers/chat'),
+      UserController = require('./controllers/user');
 
 // Middleware for login/auth
 const requireAuth = passport.authenticate('jwt', { session: false });
@@ -11,7 +12,8 @@ const requireLogin = passport.authenticate('local', { session: false });
 module.exports = function(app) {
   const apiRoutes = express.Router(),
         authRoutes = express.Router(),
-        chatRoutes = express.Router();
+        chatRoutes = express.Router(),
+        userRoutes = express.Router();
 
         // Auth Routes
         apiRoutes.use('/auth', authRoutes);
@@ -24,7 +26,7 @@ module.exports = function(app) {
         authRoutes.post('/guest', AuthenticationController.guestSignup);
 
         // Chat Routes
-        apiRoutes.use('/chat', chatRoutes)
+        apiRoutes.use('/chat', chatRoutes);
 
         // View messages from users
         chatRoutes.get('/', requireAuth, ChatController.getConversations);
@@ -43,6 +45,16 @@ module.exports = function(app) {
 
         // Post to Channel
         chatRoutes.post('/postchannel/:channelName', requireAuth, ChatController.postToChannel);
+
+        // User Routes
+        apiRoutes.use('/user', userRoutes);
+
+        // Gets user's joined channels
+        userRoutes.get('/getchannels', requireAuth, UserController.getChannels);
+
+        // Edit User Details like channels
+        userRoutes.post('/addchannel', requireAuth, UserController.addChannel);
+
 
         // Set URL for API groups
         app.use('/api', apiRoutes);

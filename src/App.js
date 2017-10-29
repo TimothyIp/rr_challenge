@@ -24,9 +24,9 @@ class App extends Component {
       <CookiesProvider>
         <div>
           <h2>
-            Sample Main Page
+            Real Time Chat App
           </h2>
-          <p>Sample information goes here</p>
+          <p>Built with React, Socket.io, Express, Node.js, MongoDB</p>
           {
             (this.state.chatShown)
               ? <ChatUIContainer />

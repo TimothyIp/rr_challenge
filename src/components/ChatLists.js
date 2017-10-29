@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Moment from 'moment';
+import AddChannelBtn from './AddChannelBtn';
 
 export default class ChatLists extends Component {
   constructor() {
@@ -18,7 +19,7 @@ export default class ChatLists extends Component {
       width: "50%"
     }
   
-    const { conversations, usersChannels } = this.props;
+    const { conversations, usersChannels, handleChange, handleSubmit, createChannel, removeChannel } = this.props;
   
     return (
       <div style={messageList}>
@@ -26,6 +27,12 @@ export default class ChatLists extends Component {
         <div style={messageList}>
         <div>
           <p>Channels</p>
+          <AddChannelBtn 
+            handleChange={handleChange}
+            handleSubmit={handleSubmit}
+            createChannel={createChannel}
+            removeChannel={removeChannel}
+          />
           {
             (usersChannels)
               ? <ul> 
@@ -33,6 +40,11 @@ export default class ChatLists extends Component {
                     return(
                       <li key={`usersChannelId-${index}`}>
                         <p>{channel}</p>
+                        {
+                          (channel !== "Public-Main")
+                            ? <button>Remove</button>
+                            : null
+                        }
                       </li>
                     )
                   })}
