@@ -221,23 +221,26 @@ exports.getConversation = function(req, res, next) {
 };
 
 exports.sendReply = function(req, res, next) {
-  const reply = new Message({
-    conversationId: req.params.conversationId,
-    body: req.body.composedMessage,
-    author: req.user._id
-  });
 
-  reply.save(function(err, sentReply) {
-    if (err) {
-      res.send({
-        error: err
-      });
-      return next(err);
-    }
+  console.log("SEND REPLY REQ BODY", req.body)
 
-    res.status(200).json({
-      message: 'Reply sent.'
-    });
-    return next();
-  });
+  // const reply = new Message({
+  //   conversationId: req.params.recipientId,
+  //   body: req.body.composedMessage,
+  //   author: req.user._id
+  // });
+
+  // reply.save(function(err, sentReply) {
+  //   if (err) {
+  //     res.send({
+  //       error: err
+  //     });
+  //     return next(err);
+  //   }
+
+  //   res.status(200).json({
+  //     message: 'Reply sent.'
+  //   });
+  //   return next();
+  // });
 }

@@ -18,7 +18,7 @@ export default class ChatLists extends Component {
       width: "50%"
     }
   
-    const { usersChannels, handleChange, handleSubmit, createChannel, removeChannel, joinChannel, usersDirectMessages, leaveConversation } = this.props;
+    const { usersChannels, handleChange, handleSubmit, createChannel, removeChannel, joinChannel, usersDirectMessages, leaveConversation, choosePrivateMessageRecipient } = this.props;
   
     return (
       <div style={messageList}>
@@ -62,7 +62,7 @@ export default class ChatLists extends Component {
                       return(
                         <li key={`convoId-${index}`}>
                           <div>
-                            <p>
+                            <p onClick={() => { choosePrivateMessageRecipient(conversation) }}>
                               {conversation.username}
                             </p>
                             <button onClick={() => {leaveConversation(conversation._id, conversation.username)}}>X</button>

@@ -8,6 +8,7 @@ import ChatBox from '../ChatBox';
 import ChatSelector from '../ChatSelector';
 import io from 'socket.io-client';
 import Moment from 'moment';
+import PrivateMessagingContainer from './PrivateMessageContainer';
 
 
 const API_URL = 'http://localhost:3000/api';
@@ -32,7 +33,6 @@ class ChatUIContainer extends Component {
       socket: null,
       composedMessage: "",
       currentChannel: "Public-Main",
-      privateMessage: "",
       conversations: [],
       channelConversations: [],
       guestSignup: "",
@@ -43,6 +43,7 @@ class ChatUIContainer extends Component {
       startDmInput: "",
       usersDirectMessages:[],
       directMessageErrorLog: [],
+      currentPrivateRecipient: {},
       token:""
     }
   }
@@ -310,9 +311,7 @@ class ChatUIContainer extends Component {
 
       this.setState({
         usersDirectMessages: updatedUsersDirectMessages || []
-      })
-
-      console.log(res)
+      });
     })
     .catch(err => {
       console.log(err)
@@ -324,41 +323,27 @@ class ChatUIContainer extends Component {
     const currentChannel = this.state.currentChannel;
 
     // If the message is not a private one, post it to the channel instead of recipient
-    if (!this.state.privateMessage) {
-      console.log("posting to channel")
-      axios.post(`${API_URL}/chat/postchannel/${this.state.currentChannel}`, { composedMessage }, {
-        headers: { Authorization: this.state.token }
+    console.log("posting to channel")
+    axios.post(`${API_URL}/chat/postchannel/${this.state.currentChannel}`, { composedMessage }, {
+      headers: { Authorization: this.state.token }
+    })
+    .then(res => {
+      const socketMsg = {
+        composedMessage,
+        channel: currentChannel,
+        author: this.state.guestUsername || this.state.username,
+        date: Moment().format()
+      }
+      socket.emit('new message', socketMsg)
+      console.log(res)
+      this.setState({
+        composedMessage: ""
       })
-      .then(res => {
-        const socketMsg = {
-          composedMessage,
-          channel: currentChannel,
-          author: this.state.guestUsername || this.state.username,
-          date: Moment().format()
-        }
-        socket.emit('new message', socketMsg)
-        console.log(res)
-        this.setState({
-          composedMessage: ""
-        })
-      })
-      .catch(err => {
-        console.log(err)
-      })
-    } else {
-      axios.post(`${API_URL}/chat/new/${recipient}`, { composedMessage }, {
-        headers: { Authorization: this.state.token }
-      })
-      .then(res => {
-        console.log(res)
-        this.setState({
-          composedMessage: "",
-        })
-      })
-      .catch(err => {
-        console.log(err)
-      });
-    }
+    })
+    .catch(err => {
+      console.log(err)
+    })
+  
   }
 
   handleChange = (event) => {
@@ -457,14 +442,36 @@ class ChatUIContainer extends Component {
         })
         
         this.setState({
-          usersDirectMessages: newUsersDirectMessages
+          usersDirectMessages: newUsersDirectMessages,
+          directMessageErrorLog: []
         })
       })
       .catch(err => {
         console.log(err)
+        const updatedErrorLog = Array.from(this.state.directMessageErrorLog);
+
+        updatedErrorLog.push(err);
+
+        this.setState({
+          directMessageErrorLog: updatedErrorLog
+        })
+
       })
     } else {
-      console.log("already exists")
+      const updatedErrorLog = Array.from(this.state.directMessageErrorLog);
+
+      updatedErrorLog.push({
+        //Had to emulate response from backend for error alert component
+        response:{
+          data: {
+            error: 'Already in conversation with that person.'
+          }
+        }
+      });
+
+      this.setState({
+        directMessageErrorLog: updatedErrorLog
+      })
     }
   }
 
@@ -487,6 +494,12 @@ class ChatUIContainer extends Component {
     })
     .catch(err => {
       console.log(err)
+    })
+  }
+
+  choosePrivateMessageRecipient = (recipient) => {
+    this.setState({
+      currentPrivateRecipient: recipient
     })
   }
 
@@ -517,6 +530,12 @@ class ChatUIContainer extends Component {
     this.setState({
       formsShown: false
     });
+  }
+
+  closePM = () => {
+    this.setState({
+      currentPrivateRecipient: {}
+    })
   }
 
   componentWillUnmount() {
@@ -566,6 +585,7 @@ class ChatUIContainer extends Component {
                 startConversation={this.startConversation}
                 leaveConversation={this.leaveConversation}
                 joinChannel={this.joinChannel}
+                choosePrivateMessageRecipient={this.choosePrivateMessageRecipient}
                 getUsersConversations={this.getUsersConversations}
                 hasToken={this.hasToken}
                 {...this.state}
@@ -575,6 +595,16 @@ class ChatUIContainer extends Component {
               guestLogin={this.guestLogin}
               {...this.state}
               />
+        }
+        {
+          (Object.getOwnPropertyNames(this.state.currentPrivateRecipient).length !== 0)
+            ? <PrivateMessagingContainer 
+                usersDirectMessages={this.state.usersDirectMessages}
+                closePM={this.closePM}
+                currentPrivateRecipient={this.state.currentPrivateRecipient}
+               />
+               
+            : null
         }
       </div>
     )

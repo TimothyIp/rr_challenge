@@ -24,7 +24,7 @@ class App extends Component {
       <CookiesProvider>
         <div>
           <h2>
-            Real Time Chat App
+            Real Time Chat App Component
           </h2>
           <p>Built with React, Socket.io, Express, Node.js, MongoDB</p>
           {
