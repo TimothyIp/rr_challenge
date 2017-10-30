@@ -32,16 +32,19 @@ module.exports = function(app) {
         chatRoutes.get('/', requireAuth, ChatController.getConversations);
 
         // Gets individual conversations
-        chatRoutes.get('/:conversationId', requireAuth, ChatController.getConversation);
+      //   chatRoutes.get('/:conversationId', requireAuth, ChatController.getConversation);
+
+        // Gets Private conversations
+        chatRoutes.get('/privatemessages/:recipientId', requireAuth, ChatController.getPrivateMessages);
+        
+        // Start new conversation
+        chatRoutes.post('/new', requireAuth, ChatController.newConversation);
+        
+        chatRoutes.post('/leave', requireAuth, ChatController.leaveConversation);
 
         // Reply to conversations
         chatRoutes.post('/reply', requireAuth, ChatController.sendReply);
-
-        // Start new conversation
-        chatRoutes.post('/new', requireAuth, ChatController.newConversation);
-
-        chatRoutes.post('/leave', requireAuth, ChatController.leaveConversation);
-
+        
         // View Chat Channel messages
         chatRoutes.get('/channel/:channelName', ChatController.getChannelConversations);
 

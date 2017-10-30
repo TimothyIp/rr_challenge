@@ -47,7 +47,7 @@ exports.newConversation = function(req, res, next) {
       res.status(200).json({
         message: `Started conversation with ${foundRecipient.username}`,
         recipientId: foundRecipient._id,
-        recipient: foundRecipient.username
+        recipient: foundRecipient.username,
       })
 
     });
@@ -165,6 +165,8 @@ exports.getChannelConversations = function(req, res, next) {
 }
 
 exports.getConversations = function (req, res, next) {
+  const username = req.user.username;
+
   // Show recent message from each conversation
   Conversation.find({ participants: req.user._id })
     .sort('_id')
@@ -186,26 +188,87 @@ exports.getConversations = function (req, res, next) {
 
       const conversationList = [];
       conversations.forEach((conversation) => {
-        const conversationWith = conversation.participants[1];
-        
-        conversationList.push(conversationWith);
+        const conversationWith = conversation.participants.filter(item => {
+          return item.username !== username
+        });
+
+        conversationList.push(conversationWith[0]);
         if (conversationList.length === conversations.length) {
           return res.status(200).json({
             conversationsWith: conversationList
           })
-        }
+        }   
       });
     });
 };
 
-exports.getConversation = function(req, res, next) {
-  Message.find({ conversationId: req.params.conversationId })
+exports.sendReply = function(req, res, next) {
+  const privateMessage = req.body.privateMessageInput;
+  const recipientId = req.body.recipientId;
+
+
+  Conversation.findOne({ participants: recipientId }, function(err, foundConversation) {
+    if (err) {
+      res.send({
+        errror: err
+      });
+      return next(err);
+    }
+
+    if (!foundConversation) {
+      return res.status(200).json({
+        message: 'Could not find conversation'
+      })
+    }
+
+    const reply = new Message({
+      conversationId: foundConversation._id,
+      body: privateMessage,
+      author: {
+        kind: 'User',
+        item: req.user._id
+      }
+    })
+
+   reply.save(function(err, sentReply) {
+    if (err) {
+      res.send({
+        error: err
+      });
+      return next(err);
+    }
+
+    res.status(200).json({
+      message: 'Reply sent.'
+    });
+    return next();
+    });
+  });
+}
+
+exports.getPrivateMessages = function(req, res, next) {
+  // console.log(req.params);
+  const userId = req.user._id;
+  const recipientId = req.params.recipientId;
+
+  Conversation.findOne({ participants: {$all: [ userId, recipientId]}}, function(err, foundConversation) {
+    if (err) {
+      res.send({
+        error: err
+      });
+      return next(err);
+    }
+
+    if (!foundConversation) {
+      return res.status(200).json({
+        message: 'Could not find conversation'
+      })
+    }
+
+    Message.find({ conversationId: foundConversation._id })
     .select('createdAt body author')
     .sort('-createdAt')
-    .populate({
-      path: 'author',
-      select: 'username'
-    })
+    .populate('author.item')
     .exec(function(err, message) {
       if (err) {
         res.send({
@@ -214,33 +277,12 @@ exports.getConversation = function(req, res, next) {
         return next();
       }
 
+      // Reverse to show most recent messages
+      const sortedMessage = message.reverse();
+
       res.status(200).json({
-        conversation: message
+        conversation: sortedMessage
       });
     });
-};
-
-exports.sendReply = function(req, res, next) {
-
-  console.log("SEND REPLY REQ BODY", req.body)
-
-  // const reply = new Message({
-  //   conversationId: req.params.recipientId,
-  //   body: req.body.composedMessage,
-  //   author: req.user._id
-  // });
-
-  // reply.save(function(err, sentReply) {
-  //   if (err) {
-  //     res.send({
-  //       error: err
-  //     });
-  //     return next(err);
-  //   }
-
-  //   res.status(200).json({
-  //     message: 'Reply sent.'
-  //   });
-  //   return next();
-  // });
+  });
 }

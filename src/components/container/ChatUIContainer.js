@@ -308,7 +308,7 @@ class ChatUIContainer extends Component {
     })
     .then(res => {
       const updatedUsersDirectMessages = res.data.conversationsWith;
-
+      console.log("RES GETUSERSCONVO", res)
       this.setState({
         usersDirectMessages: updatedUsersDirectMessages || []
       });
@@ -438,7 +438,7 @@ class ChatUIContainer extends Component {
         
         newUsersDirectMessages.push({
           username: res.data.recipient,
-          _id: res.data.recipientId
+          _id: res.data.recipientId,
         })
         
         this.setState({
@@ -602,6 +602,7 @@ class ChatUIContainer extends Component {
                 usersDirectMessages={this.state.usersDirectMessages}
                 closePM={this.closePM}
                 currentPrivateRecipient={this.state.currentPrivateRecipient}
+                token={this.state.token}
                />
                
             : null
