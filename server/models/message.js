@@ -7,8 +7,7 @@ const MessageSchema = new Schema({
     required: true
   },
   body: {
-    type: String,
-    required: true
+    type: String
   },
   author: [{
     kind: String,

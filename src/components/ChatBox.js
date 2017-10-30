@@ -23,7 +23,7 @@ const ChatBox = (props) => {
     width: "50%"
   }
 
-  const { handleSubmit, handleChange, currentChannel, channelConversations, id, getUsersConversations, hasToken, socketConversations, composedMessage, channelUsers } = props;
+  const { handleSubmit, handleChange, currentChannel, channelConversations, id, getUsersConversations, hasToken, socketConversations, composedMessage } = props;
 
   return (
       <div style={layoutContainer}>

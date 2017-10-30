@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import Moment from 'moment';
 import AddChannelBtn from './AddChannelBtn';
 import AddDMBtn from './AddDMBtn';
 
@@ -19,7 +18,7 @@ export default class ChatLists extends Component {
       width: "50%"
     }
   
-    const { conversations, usersChannels, handleChange, handleSubmit, createChannel, removeChannel, joinChannel } = this.props;
+    const { usersChannels, handleChange, handleSubmit, createChannel, removeChannel, joinChannel, usersDirectMessages, leaveConversation } = this.props;
   
     return (
       <div style={messageList}>
@@ -53,16 +52,21 @@ export default class ChatLists extends Component {
         </div>
         <div>
           <p>Private Messages</p>
+          <AddDMBtn 
+          {...this.props}
+          />
           {
-              (conversations)
+              (usersDirectMessages)
                 ? <ul>
-                    {conversations.map((conversation, index) => {
+                    {usersDirectMessages.map((conversation, index) => {
                       return(
                         <li key={`convoId-${index}`}>
-                          <p>{conversation[0].body}</p>
-                          <p>{conversation[0].author.username}</p>
-                          <p>{Moment(conversation[0].createdAt).fromNow()}</p>
-                          <p>Posted in {conversation[0].channelName || "Private Message"}</p>
+                          <div>
+                            <p>
+                              {conversation.username}
+                            </p>
+                            <button onClick={() => {leaveConversation(conversation._id, conversation.username)}}>X</button>
+                          </div>
                         </li>
                       )
                     })}

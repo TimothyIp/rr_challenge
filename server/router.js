@@ -35,10 +35,12 @@ module.exports = function(app) {
         chatRoutes.get('/:conversationId', requireAuth, ChatController.getConversation);
 
         // Reply to conversations
-        chatRoutes.post('/:conversationId', requireAuth, ChatController.sendReply);
+        chatRoutes.post('/reply/:conversationId', requireAuth, ChatController.sendReply);
 
         // Start new conversation
-        chatRoutes.post('/new/:recipient', requireAuth, ChatController.newConversation);
+        chatRoutes.post('/new', requireAuth, ChatController.newConversation);
+
+        chatRoutes.post('/leave', requireAuth, ChatController.leaveConversation);
 
         // View Chat Channel messages
         chatRoutes.get('/channel/:channelName', ChatController.getChannelConversations);

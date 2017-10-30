@@ -40,31 +40,31 @@ class ChatUIContainer extends Component {
       socketConversations: [],
       usersChannels: [],
       createInput: "",
+      startDmInput: "",
+      usersDirectMessages:[],
+      directMessageErrorLog: [],
       token:""
     }
   }
 
   componentDidMount() {
-    
     // Logs user or guest in if they have a token after refreshing or revisiting page.
     this.hasToken();
-    
+        
     // Get current channels messages
     this.getChannelConversations();
     
-    this.initSocket();    
+    this.initSocket();
+        
   }
 
   initSocket = () => {
-    const currentChannel = this.state.currentChannel;
-
     this.setState({
         socket
       })
 
     socket.on('connect', () => {
       console.log('Connected', socket.id);
-      socket.emit('enter channel', currentChannel, this.setUsername())
     });
 
     socket.on('refresh messages', (data) => {
@@ -96,14 +96,16 @@ class ChatUIContainer extends Component {
       
       userJoined.push({
         userJoined: data
-      })
+      });
 
       this.setState({
         socketConversations: userJoined
-      })      
+      }); 
     });
 
-    socket.emit('enter channel', currentChannel, this.setUsername())    
+    socket.on('disconnect', data => {
+      console.log("disconnect data", data)
+    })
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -126,6 +128,7 @@ class ChatUIContainer extends Component {
       this.setState({
         username: tokenUser.username,
         guestUsername: "",
+        guestSignup: "",
         id: tokenUser._id,
         token,
         usersChannels,
@@ -170,6 +173,7 @@ class ChatUIContainer extends Component {
         token: userData.data.token,
         id: userData.data.user._id,
         loginError:[],
+        guestSignup: "",
         usersChannels: userData.data.user.usersChannels
       }, () => {
         socket.emit('enter channel', currentChannel, this.setUsername());   
@@ -206,7 +210,8 @@ class ChatUIContainer extends Component {
       socket: null,
       token: "",
       usersChannels: [],
-      socketConversations: [],      
+      socketConversations: [],
+      guestSignup: "",      
       currentChannel: "Public-Main"
     });
   }
@@ -229,6 +234,7 @@ class ChatUIContainer extends Component {
         token:res.data.token,
         formsShown: false,
         guestUsername:"",
+        guestSignup: "",       
         usersChannels: res.data.user.usersChannels
       }, () => {
         socket.emit('enter channel', currentChannel, this.setUsername());           
@@ -262,7 +268,8 @@ class ChatUIContainer extends Component {
       this.setState({
         guestUsername: guestInfo.data.guestUser.guest.guestName,
         token: guestInfo.data.token,
-        loginError: []
+        loginError: [],
+        guestSignup: ""
       }, () => {
         socket.emit('enter channel', currentChannel, this.setUsername());           
       })      
@@ -280,6 +287,10 @@ class ChatUIContainer extends Component {
   getChannelConversations = () => {
     axios.get(`${API_URL}/chat/channel/${this.state.currentChannel}`)
     .then(res => {
+      const currentChannel = this.state.currentChannel;
+  
+      socket.emit('enter channel', currentChannel, this.setUsername());
+
       this.setState({
         channelConversations: res.data.channelMessages
       });
@@ -290,13 +301,18 @@ class ChatUIContainer extends Component {
   }
 
   getUsersConversations = () => {
+    console.log("getting user convos")
     axios.get(`${API_URL}/chat`, {
       headers: { Authorization: this.state.token }
     })
     .then(res => {
+      const updatedUsersDirectMessages = res.data.conversationsWith;
+
       this.setState({
-        conversations: res.data.conversations || []
+        usersDirectMessages: updatedUsersDirectMessages || []
       })
+
+      console.log(res)
     })
     .catch(err => {
       console.log(err)
@@ -317,7 +333,7 @@ class ChatUIContainer extends Component {
         const socketMsg = {
           composedMessage,
           channel: currentChannel,
-          author: this.state.username || this.state.guestUsername,
+          author: this.state.guestUsername || this.state.username,
           date: Moment().format()
         }
         socket.emit('new message', socketMsg)
@@ -360,7 +376,6 @@ class ChatUIContainer extends Component {
   createChannel = (e) => {
     const { cookies } = this.props;
     const createInput = this.state.createInput;
-    const currentChannel = this.state.currentChannel;
     e.preventDefault();
 
     axios.post(`${API_URL}/user/addchannel`, { createInput }, {
@@ -374,8 +389,6 @@ class ChatUIContainer extends Component {
       updatedUsersChannels.push(this.state.createInput);
 
       cookies.set('usersChannels', updatedUsersChannels, { path: "/" });
-
-      socket.emit('enter channel', currentChannel, this.setUsername())
 
       this.setState({
         socketConversations:[],
@@ -414,13 +427,67 @@ class ChatUIContainer extends Component {
     const { cookies } = this.props;
 
     cookies.set('channel', channel, { path: "/" });
-
-    socket.emit('enter channel', channel, this.setUsername())
     
     this.setState({
       socketConversations: [],      
       currentChannel: channel
     }, () => {this.getChannelConversations()})
+  }
+
+  startConversation = (e) => {
+    const startDmInput = this.state.startDmInput;
+    const usersDirectMessages = this.state.usersDirectMessages;
+    e.preventDefault();
+
+    const checkForCurrentConvos = usersDirectMessages.filter(directMessage => {
+      return directMessage.username === startDmInput
+    })
+
+    // Checks if already in current conversation with that person
+    if (!checkForCurrentConvos.length) {
+      axios.post(`${API_URL}/chat/new`, { startDmInput }, {
+        headers: { Authorization: this.state.token }
+      })
+      .then(res => {
+        const newUsersDirectMessages = Array.from(this.state.usersDirectMessages)
+        
+        newUsersDirectMessages.push({
+          username: res.data.recipient,
+          _id: res.data.recipientId
+        })
+        
+        this.setState({
+          usersDirectMessages: newUsersDirectMessages
+        })
+      })
+      .catch(err => {
+        console.log(err)
+      })
+    } else {
+      console.log("already exists")
+    }
+  }
+
+  leaveConversation = (conversationId, user) => {
+    console.log("LEAVING CONVO", conversationId)
+    axios.post(`${API_URL}/chat/leave`, {conversationId}, {
+      headers: { Authorization: this.state.token }
+    })
+    .then(res => {
+      // console.log(res)
+      const directMessages = Array.from(this.state.usersDirectMessages);
+
+      const newDirectMessages = directMessages.filter((directMessages) => {
+        return directMessages.username !== user
+      })
+
+      this.setState({
+        usersDirectMessages: newDirectMessages
+      })
+    })
+    .catch(err => {
+      console.log(err)
+    })
   }
 
   displayForms = (method) => {
@@ -453,10 +520,13 @@ class ChatUIContainer extends Component {
   }
 
   componentWillUnmount() {
+    const currentChannel = this.state.currentChannel;
+
+    socket.emit('leave channel', currentChannel, this.setUsername());
+    socket.off('connect');
     socket.off('refresh messages');
     socket.off('user joined');
     socket.off('user left');
-    socket.off('connect');
   }
 
   render() {
@@ -493,6 +563,8 @@ class ChatUIContainer extends Component {
                 handleSubmit={this.handleSubmit}
                 createChannel={this.createChannel}
                 removeChannel={this.removeChannel}
+                startConversation={this.startConversation}
+                leaveConversation={this.leaveConversation}
                 joinChannel={this.joinChannel}
                 getUsersConversations={this.getUsersConversations}
                 hasToken={this.hasToken}
