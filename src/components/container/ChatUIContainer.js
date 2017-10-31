@@ -603,6 +603,7 @@ class ChatUIContainer extends Component {
                 closePM={this.closePM}
                 currentPrivateRecipient={this.state.currentPrivateRecipient}
                 token={this.state.token}
+                username={this.state.username}
                />
                
             : null

@@ -281,7 +281,8 @@ exports.getPrivateMessages = function(req, res, next) {
       const sortedMessage = message.reverse();
 
       res.status(200).json({
-        conversation: sortedMessage
+        conversation: sortedMessage,
+        conversationId: foundConversation._id
       });
     });
   });
