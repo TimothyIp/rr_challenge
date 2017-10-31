@@ -36,6 +36,9 @@ exports = module.exports = function(io) {
       io.sockets.in(socketMsg.conversationId).emit('refresh privateMessages', socketMsg);
     })
 
+    socket.on('user typing', (data) => {
+      io.sockets.in(data.conversationId).emit('typing', data)
+    })
 
     socket.on('disconnect', () => {
       console.log('user disconnected')

@@ -69,7 +69,6 @@ class ChatUIContainer extends Component {
     });
 
     socket.on('refresh messages', (data) => {
-      console.log('received refresh socket', data)
       const newSocketConversations = Array.from(this.state.socketConversations);
       
       newSocketConversations.push(data)

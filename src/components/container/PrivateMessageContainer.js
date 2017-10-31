@@ -16,7 +16,9 @@ export default class PrivateMessagingContainer extends Component {
       privateMessageLog: [],
       conversationId: "",
       socketPMs: [],
-      currentPrivateRecipient: this.props.currentPrivateRecipient
+      currentPrivateRecipient: this.props.currentPrivateRecipient,
+      showTyping: false,
+      activeUserTyping: ""
     }
   }
 
@@ -40,7 +42,6 @@ export default class PrivateMessagingContainer extends Component {
       headers: { Authorization: this.props.token }
     })
     .then(res => {
-      console.log(res);
       const socketMsg = {
         body: privateMessageInput,
         conversationId: this.state.conversationId,
@@ -51,6 +52,10 @@ export default class PrivateMessagingContainer extends Component {
         }]
       }
       socket.emit('new privateMessage', socketMsg);
+
+      this.setState({
+        privateMessageInput: ""
+      })
     })
     .catch(err => {
       console.log(err);
@@ -66,11 +71,6 @@ export default class PrivateMessagingContainer extends Component {
       headers: { Authorization: this.props.token }
     })
     .then(res => {
-      console.log(res)
-      // const updatedMessageLogs = Array.from(this.state.privateMessageLog);
-
-      // updatedMessageLogs.push(res.data.conversation);
-
       socket.emit('enter privateMessage', res.data.conversationId)
 
       this.setState({
@@ -83,9 +83,18 @@ export default class PrivateMessagingContainer extends Component {
     })
   }
 
+  userTyping = (isTyping) => {
+    const conversationId = this.state.conversationId;
+    const username = this.props.username;
+    const data = {
+      isTyping,
+      conversationId,
+      username
+    }
+    socket.emit('user typing', data)
+  }
+
   componentWillReceiveProps(nextProps) {
-    console.log("receivedprops", nextProps)
-    // this.getPrivateMessages();
     this.setState({
       currentPrivateRecipient: nextProps.currentPrivateRecipient
     }, () => {
@@ -104,12 +113,22 @@ export default class PrivateMessagingContainer extends Component {
       this.setState({
         socketPMs: updatedSocketPMs
       })
+    });
+
+    socket.on('typing', (data) => {
+      console.log(data)
+      this.setState({
+        showTyping: data.isTyping,
+        activeUserTyping: data.username
+      });
     })
+
   }
 
   componentWillUnmount() {
     socket.emit('leave privateMessage', this.state.conversationId);
-    socket.off('refresh privateMessages'); 
+    socket.off('refresh privateMessages');
+    socket.off('typing'); 
   }
 
   render() {
@@ -118,6 +137,7 @@ export default class PrivateMessagingContainer extends Component {
         <PrivateMessaging
           handlePrivateInput={this.handlePrivateInput} 
           handlePrivateSubmit={this.handlePrivateSubmit}
+          userTyping={this.userTyping}
           {...this.props}
           {...this.state}
         />
