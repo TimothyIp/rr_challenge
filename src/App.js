@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
 import ChatUIContainer from './components/container/ChatUIContainer';
 import { CookiesProvider } from 'react-cookie';
@@ -22,7 +21,7 @@ class App extends Component {
   render() {
     return (
       <CookiesProvider>
-        <div>
+        <div className="app--container">
           <h2>
             Real Time Chat App Component
           </h2>

@@ -28,7 +28,7 @@ class ChatUIContainer extends Component {
       loginError: [],
       registrationError: [],
       formsShown: false,
-      formsMethod: "",
+      formsMethod: "guest",
       chatsShown: false,
       socket: null,
       composedMessage: "",
@@ -64,10 +64,6 @@ class ChatUIContainer extends Component {
         socket
       })
 
-    socket.on('connect', () => {
-      console.log('Connected', socket.id);
-    });
-
     socket.on('refresh messages', (data) => {
       const newSocketConversations = Array.from(this.state.socketConversations);
       
@@ -102,10 +98,6 @@ class ChatUIContainer extends Component {
         socketConversations: userJoined
       }); 
     });
-
-    socket.on('disconnect', data => {
-      console.log("disconnect data", data)
-    })
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -132,7 +124,9 @@ class ChatUIContainer extends Component {
         id: tokenUser._id,
         token,
         usersChannels,
-        currentChannel: currentChannel || "Public-Main"
+        currentChannel: currentChannel || "Public-Main",
+        formsMethod:"",
+        formsShown: false
       });
     } else if (guestToken) {
       this.setState({
@@ -164,8 +158,6 @@ class ChatUIContainer extends Component {
       cookies.set('user', userData.data.user, { path: "/" });
       cookies.set('usersChannels', userData.data.user.usersChannels, { path: "/" });
       
-      console.log(userData)
-
       this.setState({
         guestUsername:"",
         username: userData.data.user.username,
@@ -174,7 +166,8 @@ class ChatUIContainer extends Component {
         id: userData.data.user._id,
         loginError:[],
         guestSignup: "",
-        usersChannels: userData.data.user.usersChannels
+        usersChannels: userData.data.user.usersChannels,
+        formsMethod:"",
       }, () => {
         socket.emit('enter channel', currentChannel, this.setUsername());   
       });
@@ -212,7 +205,9 @@ class ChatUIContainer extends Component {
       usersChannels: [],
       socketConversations: [],
       guestSignup: "",      
-      currentChannel: "Public-Main"
+      currentChannel: "Public-Main",
+      formsMethod: "login",
+      formsShown: true
     });
   }
 
@@ -222,7 +217,6 @@ class ChatUIContainer extends Component {
 
     axios.post(`${API_URL}/auth/register`, { username, password })
     .then(res => {
-      console.log(res);
       cookies.set('token', res.data.token, { path: "/" })
       cookies.set('user', res.data.user, { path: "/" })
       cookies.set('usersChannels', res.data.user.usersChannels, { path: "/" })
@@ -235,7 +229,9 @@ class ChatUIContainer extends Component {
         formsShown: false,
         guestUsername:"",
         guestSignup: "",       
-        usersChannels: res.data.user.usersChannels
+        usersChannels: res.data.user.usersChannels,
+        formsMethod:"",
+        formsShown: false
       }, () => {
         socket.emit('enter channel', currentChannel, this.setUsername());           
       });
@@ -269,7 +265,9 @@ class ChatUIContainer extends Component {
         guestUsername: guestInfo.data.guestUser.guest.guestName,
         token: guestInfo.data.token,
         loginError: [],
-        guestSignup: ""
+        guestSignup: "",
+        formsMethod: "",
+        formsShown: false,
       }, () => {
         socket.emit('enter channel', currentChannel, this.setUsername());           
       })      
@@ -301,13 +299,12 @@ class ChatUIContainer extends Component {
   }
 
   getUsersConversations = () => {
-    console.log("getting user convos")
     axios.get(`${API_URL}/chat`, {
       headers: { Authorization: this.state.token }
     })
     .then(res => {
       const updatedUsersDirectMessages = res.data.conversationsWith;
-      console.log("RES GETUSERSCONVO", res)
+
       this.setState({
         usersDirectMessages: updatedUsersDirectMessages || []
       });
@@ -321,8 +318,6 @@ class ChatUIContainer extends Component {
     const socket = this.state.socket;
     const currentChannel = this.state.currentChannel;
 
-    // If the message is not a private one, post it to the channel instead of recipient
-    console.log("posting to channel")
     axios.post(`${API_URL}/chat/postchannel/${this.state.currentChannel}`, { composedMessage }, {
       headers: { Authorization: this.state.token }
     })
@@ -334,7 +329,7 @@ class ChatUIContainer extends Component {
         date: Moment().format()
       }
       socket.emit('new message', socketMsg)
-      console.log(res)
+
       this.setState({
         composedMessage: ""
       })
@@ -365,9 +360,7 @@ class ChatUIContainer extends Component {
     axios.post(`${API_URL}/user/addchannel`, { createInput }, {
       headers: { Authorization: this.state.token }
     })
-    .then(res => {
-      console.log(res)
-      
+    .then(res => {      
       const updatedUsersChannels = Array.from(this.state.usersChannels);
 
       updatedUsersChannels.push(this.state.createInput);
@@ -446,7 +439,6 @@ class ChatUIContainer extends Component {
         })
       })
       .catch(err => {
-        console.log(err)
         const updatedErrorLog = Array.from(this.state.directMessageErrorLog);
 
         updatedErrorLog.push(err);
@@ -475,12 +467,10 @@ class ChatUIContainer extends Component {
   }
 
   leaveConversation = (conversationId, user) => {
-    console.log("LEAVING CONVO", conversationId)
     axios.post(`${API_URL}/chat/leave`, {conversationId}, {
       headers: { Authorization: this.state.token }
     })
     .then(res => {
-      // console.log(res)
       const directMessages = Array.from(this.state.usersDirectMessages);
 
       const newDirectMessages = directMessages.filter((directMessages) => {
@@ -505,6 +495,7 @@ class ChatUIContainer extends Component {
   displayForms = (method) => {
     if (method === "login") {
       this.setState({
+        loginError: [],
         formsMethod: "login",
         formsShown: true
       });
@@ -527,6 +518,7 @@ class ChatUIContainer extends Component {
 
   closeForm = () => {
     this.setState({
+      formsMethod:"guest",
       formsShown: false
     });
   }
@@ -541,7 +533,6 @@ class ChatUIContainer extends Component {
     const currentChannel = this.state.currentChannel;
 
     socket.emit('leave channel', currentChannel, this.setUsername());
-    socket.off('connect');
     socket.off('refresh messages');
     socket.off('user joined');
     socket.off('user left');
@@ -549,31 +540,40 @@ class ChatUIContainer extends Component {
 
   render() {
     return (
-      <div>
+      <div className="chatapp__container">
         <Navigation
           displayForms={this.displayForms}
           userLogout={this.userLogout} 
+          closeForm={this.closeForm}
           {...this.state}
         />
-        {
-          (this.state.formsMethod === "login" && this.state.formsShown)
-            ?   <LoginForm 
-                  userLogin={this.userLogin}
-                  closeForm={this.closeForm}
+          {
+            (this.state.formsMethod === "login" && this.state.formsShown)
+              ?   <LoginForm 
+                    userLogin={this.userLogin}
+                    closeForm={this.closeForm}
+                    {...this.state}
+                  />
+              : null
+          }
+          {
+            (this.state.formsMethod === "register" && this.state.formsShown)
+              ?  <RegisterForm 
+                    userRegistration={this.userRegistration}
+                    closeForm={this.closeForm}
+                    {...this.state}
+                 />
+              : null
+          }
+          {
+            (this.state.formsMethod === "guest")
+              ? <ChatSelector 
+                  handleChange={this.handleChange}
+                  guestLogin={this.guestLogin}
                   {...this.state}
                 />
-            : null
-        }
-        {
-          (this.state.formsMethod === "register" && this.state.formsShown)
-            ?   <RegisterForm 
-                  userRegistration={this.userRegistration}
-                  closeForm={this.closeForm}
-                  {...this.state}
-                />
-            : null
-        }
-        <div>Chat Room Appears</div>
+              : null
+          }
         {
           (this.state.id || this.state.guestUsername)
             ? <ChatBox 
@@ -589,11 +589,7 @@ class ChatUIContainer extends Component {
                 hasToken={this.hasToken}
                 {...this.state}
               />
-            : <ChatSelector 
-              handleChange={this.handleChange}
-              guestLogin={this.guestLogin}
-              {...this.state}
-              />
+            : null
         }
         {
           (Object.getOwnPropertyNames(this.state.currentPrivateRecipient).length !== 0)

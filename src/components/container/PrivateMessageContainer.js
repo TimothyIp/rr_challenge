@@ -116,7 +116,7 @@ export default class PrivateMessagingContainer extends Component {
     });
 
     socket.on('typing', (data) => {
-      console.log(data)
+      
       this.setState({
         showTyping: data.isTyping,
         activeUserTyping: data.username

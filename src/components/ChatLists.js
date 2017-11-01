@@ -13,17 +13,11 @@ export default class ChatLists extends Component {
   }
 
   render() {
-    const messageList = {
-      backgroundColor: "#eee",
-      width: "50%"
-    }
-  
     const { usersChannels, handleChange, handleSubmit, createChannel, removeChannel, joinChannel, usersDirectMessages, leaveConversation, choosePrivateMessageRecipient } = this.props;
   
     return (
-      <div style={messageList}>
+      <div className="chatapp__userpanel--container">
         <h3>User Panel</h3>
-        <div style={messageList}>
         <div>
           <p>Channels</p>
           <AddChannelBtn 
@@ -73,7 +67,6 @@ export default class ChatLists extends Component {
                   </ul>
                 : <p>No Active Conversations</p>
             }
-        </div>
         </div>
       </div>
     )

@@ -31,22 +31,22 @@ export default class LoginForm extends Component {
 
   render() {
     return (
-      <div>
-        LOGIN FORM
-        <button onClick={this.props.closeForm}>Close</button>
-        <form onSubmit={this.handleSubmit}>
-          <input onChange={this.handleChange} name="username" type="text" label="Username" placeholder="Enter your Username"/>
-          <input onChange={this.handleChange} name="password" type="password" label="Password" placeholder="Enter your Password"/>
-          {
-            (this.props.loginError.length)
-              ? <Alert 
-                  header="Login Error has happened"
-                  content="Must enter a valid Username or password."
-                />
-              : null
-          }
-          <button>Login</button>
-        </form>
+      <div className="chatapp__form--container">
+        <div className="chatapp__form--modal">
+            <form onSubmit={this.handleSubmit}>
+              <input onChange={this.handleChange} name="username" type="text" label="Username" placeholder="&#xf2c0; Username"/>
+              <input onChange={this.handleChange} name="password" type="password" label="Password" placeholder="&#xf13e;  Password"/>
+              {
+                (this.props.loginError.length)
+                  ? <Alert 
+                      header="Login Error has happened"
+                      content="Must enter a valid Username or password."
+                    />
+                  : null
+              }
+              <button>Login</button>
+            </form>
+        </div>
       </div>
     )
   }

@@ -27,22 +27,22 @@ export default class RegisterForm extends Component {
 
   render() {
     return (
-      <div>
-        REGISTER FORM
-        <button onClick={this.props.closeForm}>Close</button>
-        <form onSubmit={this.handleSubmit}>
-          <input onChange={this.handleChange} name="username" type="text" label="Username" placeholder="Enter a Username"/>
-          <input onChange={this.handleChange} name="password" type="password" label="Password" placeholder="Enter a password"/>
-          {
-            (this.props.registrationError.length)
-              ? <Alert 
-                  header="Something went wrong"
-                  content={`${this.props.registrationError[0].response.data.error}`}
-                />
-              : null
-          }
-          <button>Register</button>
-        </form>
+      <div className="chatapp__form--container">
+        <div className="chatapp__form--modal">
+          <form onSubmit={this.handleSubmit}>
+            <input onChange={this.handleChange} name="username" type="text" label="Username" placeholder="&#xf2c0; Enter a Username"/>
+            <input onChange={this.handleChange} name="password" type="password" label="Password" placeholder="&#xf13e; Enter a password"/>
+            {
+              (this.props.registrationError.length)
+                ? <Alert 
+                    header="Something went wrong"
+                    content={`${this.props.registrationError[this.props.registrationError.length - 1].response.data.error}`}
+                  />
+                : null
+            }
+            <button>Register</button>
+          </form>
+        </div>
       </div>
     )
   }

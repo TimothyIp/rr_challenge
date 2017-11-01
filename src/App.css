@@ -6,3 +6,216 @@ input[type=reset],input[type=submit]{-webkit-appearance:button;cursor:pointer;}b
 * { box-sizing: border-box; }
 
 /* NORMALIZE */
+
+html, body {
+  height: 100%;
+  font-size: 16px;
+  font-family: 'Open Sans', sans-serif;
+}
+
+#root {
+  height: 100%;
+}
+
+.app--container {
+  height: 100%;
+}
+
+.app--container h2,
+.app--container p {
+  text-align: center;
+}
+
+.chatapp__container {
+  /* border: 1px solid #000; */
+  box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+  border-radius: 18px;
+  /* display: flex;
+  flex-direction: column; */
+  margin: 2rem;
+  min-height: 80vh;
+  height: 100%
+}
+
+.chatapp__navigation--container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  /* background-color: #3ebfac; */
+  background-color: #50586b;
+  border-bottom: 6px solid #3ebfac;
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
+  height: 5rem;
+  color: #fff;
+  font-size: 1rem;
+  letter-spacing: 1.5px;
+  font-weight: 300;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  align-items: center;
+}
+
+.chatapp__navigation--logo:hover {
+  cursor: pointer;
+  color: #3ebfac;
+}
+
+.chatapp__navigation--user {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.chatapp__navigation--user span {
+  display: block;
+  margin-right: 1.5rem;
+}
+
+.chatapp__navigation--user button {
+  background-color: #3ebfac;
+  border: none;
+  border-radius: 2px;
+  height: 2rem;
+  min-width: 4rem;
+  font-size: 0.875rem;
+  color: #fff;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.chatapp__navigation--user button:nth-of-type(1) {
+  background-color: inherit;
+  border: 1px solid #3ebfac;
+}
+
+.chatapp__navigation--user button:nth-of-type(1):hover {
+  background-color: #3ebfac;
+}
+
+.chatapp__navigation--user button:nth-of-type(2) {
+  margin-left: 1rem;
+}
+
+.chatapp__form--container {
+  background: linear-gradient(135deg, rgba(36,46,77, 0.9), rgba(137,126,121,0.9));
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  border-bottom-left-radius: 18px;
+  border-bottom-right-radius: 18px;
+  height: calc(100% - 4.5rem);
+}
+
+.chatapp__form--modal form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.chatapp__form--modal input {
+  font-family: FontAwesome, 'Open Sans', sans-serif;
+  border: none;
+  outline: none;
+  width: 100%;
+  height: 20rem;
+  margin-bottom: 1rem;
+  height: 3rem;
+  padding: 1rem;
+}
+
+.chatapp__form--container input::placeholder {
+  color: #8f8f8f;
+}
+
+.chatapp__form--modal {
+  font-size: 16px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 28.5rem;
+  padding: 3rem;
+  height: auto;
+  background: rgba(0,0,0,0.2);
+}
+
+.chatapp__form--modal:before {
+  content: "";
+  position: absolute;
+  top: -2.5px;
+  left: 0;
+  height: 2.5px;
+  width: 100%;
+  background: linear-gradient(to right, #35c3c1, #3ebfac)
+}
+
+.chatapp__form--modal button {
+  background-color: #3ebfac;
+  border: 0;
+  outline: 0;
+  color: #fff;
+  padding: 1rem;
+}
+
+.chatapp__form--guest {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  width: 60%;
+  padding: 1.5rem;
+  text-align: center;
+  border-bottom-left-radius: 2px;
+  border-bottom-right-radius: 2px;
+}
+
+.chatapp__form--guest:before {
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: 0;
+  height: 4px;
+  width: 100%;
+  background: linear-gradient(to right, #35c3c1, #3ebfac)
+}
+
+.chatapp__form--guest input {
+  font-family: FontAwesome, 'Open Sans', sans-serif;
+  border: none;
+  outline: none;
+  height: 20rem;
+  margin-right: 0;
+  margin-bottom: 1rem;
+  height: 3rem;
+  border-bottom: 1px solid #8f8f8f;
+  /* padding: 1rem; */
+}
+
+.chatapp__form--guest form {
+  display: flex;
+  flex-direction: column;
+  max-width: 20rem;
+  margin: 0 auto;
+}
+
+.chatapp__form--guest button {
+  background-color: #3ebfac;
+  border: 0;
+  outline: 0;
+  color: #fff;
+  padding: 1rem;
+}
+
+.alert {
+  color: #3ebfac;
+  position: relative;
+}
+
+.alert h3 {
+  text-align: center;
+}
+
+.chatapp__userpanel--container {
+  width: 25%;
+}

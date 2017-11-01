@@ -1,30 +1,33 @@
 import React from 'react';
 
 const Navigation = (props) => {
-  const { displayForms, id, userLogout, username, guestUsername } = props;
+  const { displayForms, id, userLogout, username, guestUsername, closeForm } = props;
 
   return (
-    <div>
-      <div>
-        Chat Navigation {
-          (username)
-            ? <span>Logged in as {username}</span>
-            : null
-        }
-        {
-          (guestUsername)
-            ? <span>Logged in as Guest-{guestUsername}</span>
-            : null
-        }
+    <div className="chatapp__navigation--container">
+      <div className="chatapp__navigation--logo" onClick={() => {closeForm()}}>
+          Live Chat
       </div>
-      {
-        (id)
-          ? <button onClick={userLogout}>Logout</button>
-          : <div>
-            <button onClick={() => {displayForms("login")}}>Login</button>
-            <button onClick={() => {displayForms("register")}}>Sign Up</button>
-            </div>
-      }
+      <div className="chatapp__navigation--user">
+            {
+              (username)
+                ? <span>{username}</span>
+                : null
+            }
+            {
+              (guestUsername)
+                ? <span>Guest-{guestUsername}</span>
+                : null
+            }
+            {
+              (id)
+                ? <button onClick={userLogout}>Logout</button>
+                : <div>
+                  <button onClick={() => {displayForms("login")}}>Login</button>
+                  <button onClick={() => {displayForms("register")}}>Sign Up</button>
+                  </div>
+            }
+      </div>
     </div>
   )
 }
