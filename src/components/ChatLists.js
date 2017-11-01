@@ -17,56 +17,63 @@ export default class ChatLists extends Component {
   
     return (
       <div className="chatapp__userpanel--container">
-        <h3>User Panel</h3>
-        <div>
-          <p>Channels</p>
-          <AddChannelBtn 
-            handleChange={handleChange}
-            handleSubmit={handleSubmit}
-            createChannel={createChannel}
-          />
-          {
-            (usersChannels)
-              ? <ul> 
-                  {usersChannels.map((channel, index) => {
-                    return(
-                      <li key={`usersChannelId-${index}`}>
-                        <div onClick={() => {joinChannel(channel)}}>{channel}</div>
-                        {
-                          (channel !== "Public-Main")
-                            ? <button onClick={() => {removeChannel(channel)}}>Remove</button>
-                            : null
-                        }
-                      </li>
-                    )
-                  })}
-                </ul>
-              : null
-          }
-        </div>
-        <div>
-          <p>Private Messages</p>
-          <AddDMBtn 
-          {...this.props}
-          />
-          {
-              (usersDirectMessages)
-                ? <ul>
-                    {usersDirectMessages.map((conversation, index) => {
+        <div className="userpanel__channels--container">
+          <div className="userpanel__channels--add">
+            <p>Channels</p>
+            <AddChannelBtn 
+              handleChange={handleChange}
+              handleSubmit={handleSubmit}
+              createChannel={createChannel}
+            />
+          </div>
+          <div className="userpanel__channels--list">
+            {
+              (usersChannels)
+                ? <ul> 
+                    {usersChannels.map((channel, index) => {
                       return(
-                        <li key={`convoId-${index}`}>
-                          <div>
-                            <p onClick={() => { choosePrivateMessageRecipient(conversation) }}>
-                              {conversation.username}
-                            </p>
-                            <button onClick={() => {leaveConversation(conversation._id, conversation.username)}}>X</button>
-                          </div>
+                        <li onClick={() => {joinChannel(channel)}} key={`usersChannelId-${index}`}>
+                          <p>
+                            {channel}
+                          </p>
+                          {
+                            (channel !== "Public-Main")
+                              ? <button onClick={() => {removeChannel(channel)}}>&#xf014;</button>
+                              : null
+                          }
                         </li>
                       )
                     })}
                   </ul>
-                : <p>No Active Conversations</p>
+                : null
             }
+          </div>
+        </div>
+        <div className="userpanel__channels--container">
+          <div className="userpanel__channels--add">
+            <p>Private Messages</p>
+            <AddDMBtn 
+            {...this.props}
+            />
+          </div>
+          <div className="userpanel__channels--list">
+            {
+                (usersDirectMessages)
+                  ? <ul>
+                      {usersDirectMessages.map((conversation, index) => {
+                        return(
+                          <li key={`convoId-${index}`}>
+                              <p onClick={() => { choosePrivateMessageRecipient(conversation) }}>
+                                {conversation.username}
+                              </p>
+                              <button onClick={() => {leaveConversation(conversation._id, conversation.username)}}>&#xf014;</button>
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  : <p>No Active Conversations</p>
+              }
+          </div>
         </div>
       </div>
     )

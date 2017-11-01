@@ -18,29 +18,11 @@ export default class ChatBox extends Component {
     this.scrollDown();  
   }
 
-  render() {
-    const layoutContainer = {
-      display: "flex",
-      flexDirection: "row",
-      width: "100%",
-    }
-  
-    const messageBox = {
-      width: "100%",
-      height: "590px",
-      border: "1px solid black",
-      overflow: "scroll"
-    }
-  
-    const chatBox = {
-      flexDirection: "column",
-      width: "50%"
-    }
-  
+  render() {  
     const { handleSubmit, handleChange, currentChannel, channelConversations, id, getUsersConversations, hasToken, socketConversations, composedMessage } = this.props;
   
     return (
-        <div style={layoutContainer}>
+        <div className="chatapp__mainchat--container">
           {
             (id)
             ? <ChatLists 
@@ -50,9 +32,9 @@ export default class ChatBox extends Component {
                 />
               : null
           }
-          <div style={chatBox}>
-            <h3>Current Channel: {currentChannel}</h3>
-            <div ref="chat_container" style={messageBox}>
+          <div className="chatapp__chatbox">
+            <h3>Channel: {currentChannel}</h3>
+            <div className="chatapp__chatbox--messages" ref="chat_container">
               {
                 (channelConversations)
                   ? <ul>

@@ -20,17 +20,17 @@ closeMenu = () => {
     const { handleChange, createChannel } = this.props;
 
     return (
-      <div>
+      <div className="channel__add--popup">
         {
           (this.state.showMenu)
-            ? <div>
-              <form onSubmit={createChannel} >
-                <input onChange={handleChange} type="text" name="createInput" placeholder="Enter a channel name"/>
-                <button type="submit">Join</button>
-              </form>
-              <button onClick={this.closeMenu}>Close</button>
+            ? <div className="channel__search">
+                <form onSubmit={createChannel} >
+                  <input onChange={handleChange} type="text" name="createInput" placeholder="&#xf002; Channel name" required/>
+                  <button className="join__btn" type="submit">&#xf090;</button>
+                </form>
+                <button className="close__btn" onClick={this.closeMenu}>&#xf057;</button>
               </div>
-            : <button onClick={this.handleClick}>Add</button>
+            : <button className="add__btn" onClick={this.handleClick}>&#xf055;</button>
         }
       </div>
     )
