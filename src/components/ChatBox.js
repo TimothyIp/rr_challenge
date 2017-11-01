@@ -19,7 +19,7 @@ export default class ChatBox extends Component {
   }
 
   render() {  
-    const { handleSubmit, handleChange, currentChannel, channelConversations, id, getUsersConversations, hasToken, socketConversations, composedMessage } = this.props;
+    const { handleSubmit, handleChange, currentChannel, channelConversations, id, getUsersConversations, hasToken, socketConversations, composedMessage, username } = this.props;
   
     return (
         <div className="chatapp__mainchat--container">
@@ -40,10 +40,18 @@ export default class ChatBox extends Component {
                   ? <ul>
                       {channelConversations.map((message, index) => {
                         return (
-                          <li key={`chatMsgId-${index}`}>
-                            <p>{message.body}</p>
-                            <p>Posted by: {message.author[0].item.username || message.author[0].item.guestName}</p>
-                            <p>{Moment(message.createdAt).fromNow()}</p>
+                          <li className={(username !== message.author[0].item.username || message.author[0].item.guestName) ? "chat-received" : null} key={`chatMsgId-${index}`}>
+                            <div className="speech--bubble--author">
+                              {
+                                (username === message.author[0].item.username || message.author[0].item.guestName)
+                                  ? <p>You</p>
+                                  : <p>{message.author[0].item.username || message.author[0].item.guestName}</p>
+                              }
+                              <p className="speech--bubble--date">{Moment(message.createdAt).fromNow()}</p>
+                            </div>
+                            <div className="speech--bubble">
+                              <p>{message.body}</p>
+                            </div>
                           </li>
                         )
                       })}
@@ -55,11 +63,27 @@ export default class ChatBox extends Component {
                   ? <ul>
                       {socketConversations.map((message, index) => {
                         return (
-                          <li key={`socketMsgId-${index}`}>
-                            <p>{message.composedMessage}</p>
-                            <p>{message.author}</p>
-                            <p>{message.userJoined}</p>
-                            <p>{Moment(message.date).fromNow()}</p>
+                          <li className={(!message.author) ? "user--joined" : (username !== message.author) ? "chat--received" : null}key={`socketMsgId-${index}`}>
+                              {
+                                (message.userJoined)
+                                  ? <p>{message.userJoined}</p>
+                                  : null
+                              }
+                            <div className="speech--bubble--author">
+                              {
+                                (username === message.author)
+                                  ? <p>You</p>
+                                  : <p>{message.author}</p>
+                              }
+                              <p className="speech--bubble--date">{Moment(message.date).fromNow()}</p>
+                            </div>
+                            {
+                              (!message.userJoined)
+                                ? <div className="speech--bubble">
+                                    <p>{message.composedMessage}</p>
+                                  </div>
+                                : null
+                            }
                           </li>
                           
                         )
@@ -69,8 +93,7 @@ export default class ChatBox extends Component {
               }
             </div>
             <form onSubmit={handleSubmit}>
-              <input onChange={handleChange} value={composedMessage} name="composedMessage" type="text" autoComplete="off"/>
-              <button>Send</button>
+              <input onChange={handleChange} value={composedMessage} name="composedMessage" placeholder="Type a message here" type="text" autoComplete="off"/>
             </form>
           </div>
         </div>

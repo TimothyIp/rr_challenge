@@ -222,6 +222,9 @@ button {
 .chatapp__userpanel--container {
   width: calc(33% / 1.1618);
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 }
 
 .chatapp__userpanel--container button {
@@ -251,19 +254,17 @@ button {
 }
 
 .userpanel__channels--add .add__btn,
-.userpanel__channels--add .close__btn,
-.userpanel__channels--add .join__btn {
+.userpanel__channels--add .close__btn {
   font-family: FontAwesome, 'Open Sans', sans-serif;
-  color: #a77fb2;
+  color: #3ebfac;
 }
 
-.userpanel__channels--add .close__btn,
-.userpanel__channels--add .join__btn {
+.userpanel__channels--add .close__btn {
   padding-left: 0.875rem;
 }
 
 .userpanel__channels--add button:hover {
-  color: #3ebfac;
+  color: #a77fb2;
 }
 
 .channel__add--popup input {
@@ -288,8 +289,7 @@ button {
   margin: 0;
   list-style: none;
   overflow-y: scroll;
-  height: 100%;
-  max-height: 22rem;
+  max-height: 20rem;
 }
 
 .userpanel__channels--list li {
@@ -311,7 +311,7 @@ button {
 .userpanel__channels--list button {
   font-family: FontAwesome, 'Open Sans', sans-serif;
   padding-right: 1.5rem;
-  color: #a77fb2;
+  color: #3ebfac;
 }
 
 .userpanel__channels--list button:hover {
@@ -320,12 +320,23 @@ button {
 
 .chatapp__mainchat--container {
   display: flex;
+  height: 100%;
+  flex-grow: 1;
 }
 
 .chatapp__chatbox {
   background-color: #fff;
   width: 100%;
   border-left: 1px solid #eee;
+  height: 100%;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;  
+  border-bottom-right-radius: 18px;
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14),
+  0 1px 5px 0 rgba(0, 0, 0, .12),
+  0 3px 1px -2px rgba(0, 0, 0, .2);
 }
 
 .chatapp__chatbox h3 {
@@ -335,10 +346,104 @@ button {
   margin-bottom: 0;
   height: 3.5rem;
   line-height: 3.5rem;
+  border-bottom:2px solid #a77fb2;
+}
+
+.chatapp__chatbox form {
+  display: flex;
+  padding: 1.5rem;
+  height: 100%;
+  max-height: 5rem;
+  border-top: 1px solid #f1f1f1;
+  width: 100%;
+}
+
+.chatapp__chatbox form input {
+  flex-grow: 1;
+  border: none;
+  padding: 1rem;
+  border: 1px solid #8f8f8f;
+  outline: none;
+  border-radius: 40px;
+}
+
+.chatapp__chatbox input:focus {
+  border: 1px solid #3ebfac;
 }
 
 .chatapp__chatbox--messages {
   background-color: #f3f3f3;
   overflow-y: scroll;
-  height: 100%;
+  flex-grow: 1;
+}
+
+.chatapp__chatbox--messages ul {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  padding-left: 3rem;
+  padding-right: 3rem;
+}
+
+.chatapp__chatbox--messages li {
+  display: inline-block;
+  /* margin: 0 auto; */
+  align-self: flex-end;
+  text-align: right;
+}
+
+.chatapp__chatbox--messages .chat-received {
+  text-align: left;
+  align-self: flex-start;
+  border-left: 0px solid;
+}
+
+.chatapp__chatbox--messages .chat-received .speech--bubble {
+  border-left: 2.25px solid #a77fb2;
+  border-right: 0;
+}
+
+.chatapp__chatbox--messages .user--joined {
+  align-self: center;
+  padding-bottom: 1.5rem;
+}
+
+.chatapp__chatbox--messages .user--joined .speech--bubble--date,
+.chatapp__chatbox--messages .user--joined .speech--bubble--author {
+  padding: 0;
+  text-align: center;
+  width: 100%;
+}
+
+.chatapp__chatbox--messages .user--joined p {
+  margin: 0;
+}
+
+.speech--bubble {
+  background-color: #fff;
+  padding: 0.15rem;
+  display: inline-block;
+  min-width: 3rem;
+  color: #000;
+  border-right: 2.25px solid #3ebfac;
+  margin-bottom: 1rem;
+}
+
+.speech--bubble p {
+  margin: 0;
+  padding: 0.875rem;
+}
+
+.speech--bubble--author {
+  display: flex;
+  font-weight: 300;
+}
+
+.speech--bubble--date {
+  padding-left: 1rem;
+  color: #8f8f8f;
+  font-weight: 300;
 }

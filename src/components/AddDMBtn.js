@@ -36,7 +36,6 @@ closeMenu = () => {
               <div className="channel__search">
                 <form onSubmit={startConversation}>
                   <input onChange={handleChange} type="text" name="startDmInput" placeholder="&#xf002; Recipient name"/>
-                  <button className="join__btn" type="submit">&#xf1d8;</button>
                 </form>
                 <button className="close__btn" onClick={this.closeMenu}>&#xf057;</button>
               </div>

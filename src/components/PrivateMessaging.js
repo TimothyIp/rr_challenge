@@ -80,9 +80,9 @@ export default class PrivateMessaging extends Component{
                   {privateMessageLog.map((message, index) => {
                     return (
                       <li key={`chatMsgId-${index}`}>
+                        <p>{message.author[0].item.username}</p>
+                        <p>{Moment(message.createdAt).fromNow()}</p>
                         <p>{message.body}</p>
-                        <p>Posted by: {message.author[0].item.username}</p>
-                        <p>Sent at: {Moment(message.createdAt).fromNow()}</p>
                       </li>
                     )
                   })}
@@ -95,9 +95,9 @@ export default class PrivateMessaging extends Component{
                 {socketPMs.map((message, index) => {
                   return (
                     <li key={`socketPMsId-${index}`}>
+                      <p>{message.author[0].item.username}</p>
+                      <p>{Moment(message.createdAt).fromNow()}</p>
                       <p>{message.body}</p>
-                      <p>Posted by: {message.author[0].item.username}</p>
-                      <p>Sent at: {Moment(message.createdAt).fromNow()}</p>
                     </li>
                   )
                 })}

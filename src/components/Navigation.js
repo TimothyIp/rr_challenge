@@ -5,7 +5,7 @@ const Navigation = (props) => {
 
   return (
     <div className="chatapp__navigation--container">
-      <div className="chatapp__navigation--logo" onClick={() => {closeForm()}}>
+      <div className="chatapp__navigation--logo" onClick={() => {if(!username){closeForm()}}}>
           Live Chat
       </div>
       <div className="chatapp__navigation--user">

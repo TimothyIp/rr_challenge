@@ -26,7 +26,6 @@ closeMenu = () => {
             ? <div className="channel__search">
                 <form onSubmit={createChannel} >
                   <input onChange={handleChange} type="text" name="createInput" placeholder="&#xf002; Channel name" required/>
-                  <button className="join__btn" type="submit">&#xf090;</button>
                 </form>
                 <button className="close__btn" onClick={this.closeMenu}>&#xf057;</button>
               </div>
