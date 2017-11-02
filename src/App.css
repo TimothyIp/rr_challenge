@@ -457,9 +457,11 @@ button {
   padding: 0.875rem;
 }
 
-.speech--bubble--author {
-  display: flex;
+.speech--bubble--author p {
+  display: inline-block;
+  /* padding: 0.25rem; */
   font-weight: 300;
+  text-align: right;
 }
 
 .speech--bubble--date {
