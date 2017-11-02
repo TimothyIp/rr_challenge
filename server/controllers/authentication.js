@@ -35,6 +35,7 @@ exports.register = function(req, res, next) {
   const username = req.body.username;
   const password = req.body.password;
 
+  // Validating username and password
   if(!username) {
     return res.status(422).send({
       error: 'You must enter a username.'
@@ -47,6 +48,7 @@ exports.register = function(req, res, next) {
     })
   }
 
+  // Looks for existing username and makes user account if no duplicate are found
   User.findOne({ username }, function(err, existingUser) {
     if (err) {
       return next(err);
@@ -106,7 +108,7 @@ exports.guestSignup = function(req, res, next) {
       guestName
     });
 
-    // Checks against Usernames
+    // Checks against Usernames so there is no overlap
     User.findOne({ username: guestName}, function(err, existingUser) {
       if (err) {
         return next(err);
@@ -121,7 +123,8 @@ exports.guestSignup = function(req, res, next) {
           if (err) {
             return next(err);
           }
-    
+          
+          // Generates a token for guests to be able to make certain api calls to the backend
           res.status(200).json({
             token: 'JWT ' + generateToken({guest}),
             guestUser: {guest},

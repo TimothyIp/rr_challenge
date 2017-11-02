@@ -5,6 +5,7 @@ const Conversation = require('../models/conversation'),
       User = require('../models/user'),
       Channel = require('../models/channel');
 
+// Creates a conversation link between user and recipient for private messaging
 exports.newConversation = function(req, res, next) {
   const recipient = req.body.startDmInput;
   const userId = req.user._id
@@ -16,6 +17,8 @@ exports.newConversation = function(req, res, next) {
     return next();
   }
 
+  // Looks for a username with recipient name then creates a new Conversation schema with both user and 
+  // recipient in the participants array in the conversation model.
   User.findOne({ username: recipient }, function(err, foundRecipient) {
     if (err) {
       res.send({
@@ -30,6 +33,7 @@ exports.newConversation = function(req, res, next) {
       });
     }
 
+    // Adds both user id and recipient id to a participants array
     const conversation = new Conversation({
       participants: [ req.user._id , foundRecipient._id ]
     })
@@ -53,9 +57,11 @@ exports.newConversation = function(req, res, next) {
   });
 }
 
+// Lets users remove the current conversation in their user panel.
 exports.leaveConversation = function(req, res, next) {
   const conversationToLeave = req.body.conversationId;
   
+  // Is given the recipient id and then looks in participants array in conversations
   Conversation.findOneAndRemove({ participants: conversationToLeave }, function(err, foundConversation){
     if (err) {
       res.send({
@@ -71,6 +77,7 @@ exports.leaveConversation = function(req, res, next) {
   });
 }
 
+// Takes a channel name and message, then saves a new message with the id from the saved model of channel.
 exports.postToChannel = function(req, res, next) {
   const channelName = req.params.channelName;
   const composedMessage = req.body.composedMessage;
@@ -98,7 +105,7 @@ exports.postToChannel = function(req, res, next) {
       return next(err);
     }
 
-  // Tells mongodb which to schema to reference a guest or user collection
+  // Tells mongodb which schema to reference, a guest or user collection to display the correct author for messages.
    const checkAuthor = () => {
       if (req.user.username) {
         let author = {
@@ -138,6 +145,8 @@ exports.postToChannel = function(req, res, next) {
   })
 }
 
+// Looks for channel conversations by looking up all the messages 
+// that has the requested channel name when the message was saved.
 exports.getChannelConversations = function(req, res, next) {
   const channelName = req.params.channelName;
 
@@ -160,6 +169,9 @@ exports.getChannelConversations = function(req, res, next) {
     })
 }
 
+// Gets a over log of active conversations the user is in.
+// Looks up the all the places where the participants is the user in conversation model
+// Returns all the different conversations where the participant is the user.
 exports.getConversations = function (req, res, next) {
   const username = req.user.username;
 
@@ -198,6 +210,9 @@ exports.getConversations = function (req, res, next) {
     });
 };
 
+// Takes a message, recipient id, and user id
+// Looks at all conversations where the recipient id and user id match in the participants array then gets that id
+// Using the conversation id, a reply is made with a new message with the same conversation Id
 exports.sendReply = function(req, res, next) {
   const privateMessage = req.body.privateMessageInput;
   const recipientId = req.body.recipientId;
@@ -242,6 +257,9 @@ exports.sendReply = function(req, res, next) {
   });
 }
 
+// Gets a user id and recipient Id
+// Looks at all the conversations where the participants are the user id and recipient - this returns the conversation id if found
+// Using that conversation id, it looks through the messages for that conversation Id and returns all the messages for that conersation
 exports.getPrivateMessages = function(req, res, next) {
   const userId = req.user._id;
   const recipientId = req.params.recipientId;

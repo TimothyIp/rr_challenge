@@ -56,6 +56,7 @@ const jwtLogin = new JwtStrategy(jwtOptions, function(payload, done) {
     if (user) {
       done(null, user);
     } else {
+      // Reads guest token for api calls
       Guest.findOne(payload.guestName, function(err, guest) {
         if (err) {
           return done(err, false);

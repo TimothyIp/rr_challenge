@@ -55,9 +55,12 @@ class ChatUIContainer extends Component {
     // Get current channels messages
     this.getChannelConversations();
     
+    // Initialize the socket listeners for events from the backend
     this.initSocket();
   }
 
+  // Sets up socket listeners to listen for when to refresh messages, when a new user has joined,
+  // or when a user has left the channel
   initSocket = () => {
     this.setState({
         socket
@@ -99,12 +102,13 @@ class ChatUIContainer extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    // Tells socket when user has left channel
+    // Tells socket when a user has left channel by comparing against previous and new channel states
     if (prevState.currentChannel !== this.state.currentChannel) {
       socket.emit('leave channel', prevState.currentChannel, this.setUsername())
     }
   }
 
+  // If a token can be found, it will populate back the user's information on browser refresh
   hasToken = () => {
     const { cookies } = this.props;
     const token = cookies.get('token');
@@ -136,7 +140,7 @@ class ChatUIContainer extends Component {
     }
   };
 
-  // Checks username, then return whether a username or guestname
+  // Checks username, then return whether it current is a username or guestname
   setUsername = () => {
     const username = this.state.username;
     const guestUsername = this.state.guestUsername;
@@ -148,6 +152,9 @@ class ChatUIContainer extends Component {
     }
   }
 
+  // Takes a username and password
+  // POST calls to the backend api with that information
+  // If the login is successful, cookies are set with the token, user's data, and their channels
   async userLogin({ username, password }) {
     const { cookies } = this.props;
     const currentChannel = this.state.currentChannel;  
@@ -169,12 +176,13 @@ class ChatUIContainer extends Component {
         usersChannels: userData.data.user.usersChannels,
         formsMethod:"",
       }, () => {
+        // After the login state is set, tell the backend sockets that a new user has entered
         socket.emit('enter channel', currentChannel, this.setUsername());   
       });
     } catch(error) {
-        // Always show most recent errors
         const errorLog = Array.from(this.state.loginError);
-  
+      
+        // Always show most recent errors
         errorLog.length = [];
         errorLog.push(error);
   
@@ -184,6 +192,9 @@ class ChatUIContainer extends Component {
     }
   }
 
+  // On logout, remove all cookies that were saved and emit to the backend socket listener
+  // that a user has left the current channel.
+  // Sets the state back to fresh
   userLogout = () => {
     const { cookies } = this.props;
     const currentChannel = this.state.currentChannel;
@@ -211,6 +222,8 @@ class ChatUIContainer extends Component {
     });
   }
 
+  // Takes a username and password, then makes a POST call to our api which returns a token and that user's info
+  // Then sets cookies of the given token, user data, and users channels
   userRegistration = ({ username, password }) => {
     const { cookies } = this.props;
     const currentChannel = this.state.currentChannel;
@@ -232,6 +245,7 @@ class ChatUIContainer extends Component {
         usersChannels: res.data.user.usersChannels,
         formsMethod:""
       }, () => {
+        // Tells the backend sockets that a user has entered a channel
         socket.emit('enter channel', currentChannel, this.setUsername());           
       });
     })
@@ -248,6 +262,8 @@ class ChatUIContainer extends Component {
     });
   }
 
+  // Guest signup, on successful POST call to our api, it returns a token and guest's data
+  // Saves the token and guestname as cookies 
   async guestLogin(e) {
     e.preventDefault();
     const { cookies } = this.props;
@@ -268,6 +284,7 @@ class ChatUIContainer extends Component {
         formsMethod: "",
         formsShown: false,
       }, () => {
+        // Tells backend sockets that a new user has entered the channel
         socket.emit('enter channel', currentChannel, this.setUsername());           
       })      
     } catch(error) {
@@ -281,6 +298,8 @@ class ChatUIContainer extends Component {
     }
   }
 
+  // GET calls to backend API with the given current channel name.
+  // responds back with all the conversations in that given channel
   getChannelConversations = () => {
     axios.get(`${API_URL}/chat/channel/${this.state.currentChannel}`)
     .then(res => {
@@ -297,6 +316,8 @@ class ChatUIContainer extends Component {
     })
   }
 
+  // GET call to the backend api with the token given from login in the header.
+  // this returns a list of all the user's active conversations
   getUsersConversations = () => {
     axios.get(`${API_URL}/chat`, {
       headers: { Authorization: this.state.token }
@@ -313,6 +334,11 @@ class ChatUIContainer extends Component {
     });
   }
 
+  // Takes a message and recipient, then makes a POST call with the message in the body of the call
+  // as well as the token given on login in the header.
+  // On successful post call, the message is saved to mongodb
+  // This then emits to the socket listeners on the server that a message was sent,
+  // which returns a refresh message message for us to get updated messages from the mongodb.
   sendMessage = (composedMessage, recipient) => {
     const socket = this.state.socket;
     const currentChannel = this.state.currentChannel;
@@ -351,6 +377,10 @@ class ChatUIContainer extends Component {
     this.sendMessage(this.state.composedMessage);
   }
 
+  // Takes a channel name and then makes a POST call to the backend API,
+  // requires a token for authorization to create a channel.
+  // On success, the new array is pushed into the user's current user channel,
+  // and saves the new channel list in cookie and refreshes channel conversations.
   createChannel = (e) => {
     const { cookies } = this.props;
     const createInput = this.state.createInput;
@@ -377,6 +407,8 @@ class ChatUIContainer extends Component {
     })
   }
 
+  // Takes a channel name parameter, then a POST call with authorization token to backend API,
+  // On success, cookies are set of the updated user channels 
   removeChannel = (channel) => {   
     const { cookies } = this.props;
     
@@ -399,6 +431,8 @@ class ChatUIContainer extends Component {
     })
   }
 
+  // Takes a channel name parameter, saves it as a cookie, then sets the state of current channel,
+  // to that channel paramter.
   joinChannel = (channel) => {
     const { cookies } = this.props;
 
@@ -410,6 +444,8 @@ class ChatUIContainer extends Component {
     }, () => {this.getChannelConversations()})
   }
 
+  // Takes the input and checks against user's conversation to see if their are duplicates,
+  // On success, a POST call is made with the message
   startConversation = (e) => {
     const startDmInput = this.state.startDmInput;
     const usersDirectMessages = this.state.usersDirectMessages;
@@ -451,7 +487,7 @@ class ChatUIContainer extends Component {
       const updatedErrorLog = Array.from(this.state.directMessageErrorLog);
 
       updatedErrorLog.push({
-        //Had to emulate response from backend for error alert component
+        //Had to emulate response from backend for error the alert component
         response:{
           data: {
             error: 'Already in conversation with that person.'
@@ -465,6 +501,10 @@ class ChatUIContainer extends Component {
     }
   }
 
+  // Takes a conversation id and user parameter
+  // POST calls with the conversation id to the backend
+  // On success, it removes that conversation from the users data
+  // then alter the current conversations state to reflect the new change, so we dont need to refresh.
   leaveConversation = (conversationId, user) => {
     axios.post(`${API_URL}/chat/leave`, {conversationId}, {
       headers: { Authorization: this.state.token }
@@ -491,6 +531,8 @@ class ChatUIContainer extends Component {
     })
   }
 
+  // Depending on the parameter, different pages are shown
+  // The Login, Register or the Guest sign up page. 
   displayForms = (method) => {
     if (method === "login") {
       this.setState({
@@ -531,6 +573,7 @@ class ChatUIContainer extends Component {
     })
   }
 
+  // When the component unmounts, we detach all the listeners and give the server sockets a leave channel signal
   componentWillUnmount() {
     const currentChannel = this.state.currentChannel;
 

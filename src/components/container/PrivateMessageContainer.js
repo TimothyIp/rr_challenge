@@ -34,6 +34,9 @@ export default class PrivateMessagingContainer extends Component {
     this.sendPrivateMessage();
   }
 
+  // Makes a POST call with a private message and a recipient id to save a message.
+  // On success, it emits to the server sockets, a socketMsg object containing what is sent to mongodb, so it can
+  // send that information to the recipient if they are connected.
   sendPrivateMessage = () => {
     const privateMessageInput = this.state.privateMessageInput;
     const recipientId = this.props.currentPrivateRecipient._id;
@@ -62,6 +65,9 @@ export default class PrivateMessagingContainer extends Component {
     })
   }
 
+  // Takes the current private recipient and makes a POST call taking the recipient id.
+  // On success, it joins the user into a socket room with the conversation id returned as the room name.
+  // Takes the response from the backend and sets the state with the conversation logs.
   getPrivateMessages = () => {
     const currentPrivateRecipient = this.props.currentPrivateRecipient;
 
@@ -70,7 +76,6 @@ export default class PrivateMessagingContainer extends Component {
     })
     .then(res => {
       socket.emit('enter privateMessage', res.data.conversationId)
-      console.log("GET PM", res.data)
       this.setState({
         privateMessageLog: res.data.conversation,
         conversationId: res.data.conversationId
@@ -81,6 +86,8 @@ export default class PrivateMessagingContainer extends Component {
     })
   }
 
+  // Tells the socket when a user is current typing.
+  // Sends the conversation id and username to display who is typing.
   userTyping = (isTyping) => {
     const conversationId = this.state.conversationId;
     const username = this.props.username;
@@ -92,6 +99,7 @@ export default class PrivateMessagingContainer extends Component {
     socket.emit('user typing', data)
   }
 
+  // On different recipients, it will get new private messages.
   componentWillReceiveProps(nextProps) {
     this.setState({
       currentPrivateRecipient: nextProps.currentPrivateRecipient
@@ -100,6 +108,7 @@ export default class PrivateMessagingContainer extends Component {
     })
   }
 
+  // On mount, it gets private messages, and adds socket listeners for new private messages.
   componentDidMount() {
     this.getPrivateMessages();
 
@@ -123,6 +132,7 @@ export default class PrivateMessagingContainer extends Component {
 
   }
 
+  // Removes socket listeners and tells sever sockets the user has left that private room.
   componentWillUnmount() {
     socket.emit('leave privateMessage', this.state.conversationId);
     socket.off('refresh privateMessages');

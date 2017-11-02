@@ -10,11 +10,15 @@ export default class PrivateMessaging extends Component{
     }
   }
 
+  // Scrolls down to the bottom of chat log for most recent messages
   scrollDown = () => {
     const { chat_container } = this.refs;
     chat_container.scrollTop = chat_container.scrollHeight;
   }
 
+  // Checks if the user is typing, if they are, it sets the state of isTyping to true,
+  // then it calls the startCheckTyping function
+  // Tells server sockets, that someone is typing.
   sendTyping = () => {
     this.lastUpdateTime = Date.now();
 
@@ -27,6 +31,8 @@ export default class PrivateMessaging extends Component{
     }
   }
 
+  // Sets up intervals which will set the typing to false, if there is no typing after 300ms,
+  // it sets state of isTyping to false and calls the stopCheckTyping function
   startCheckTyping = () => {
     this.typingInterval = setInterval(() => {
       if((Date.now() - this.lastUpdateTime) > 300) {
@@ -38,6 +44,7 @@ export default class PrivateMessaging extends Component{
     }, 300)
   }
 
+  // If there are active intervals running, it clears them and sends the socket that no more user is typing
   stopCheckTyping = () => {
     if (this.typingInterval) {
       clearInterval(this.typingInterval)
@@ -53,6 +60,7 @@ export default class PrivateMessaging extends Component{
     this.scrollDown();  
   }
 
+  // If there are active intervals running, we clear them on dismount
   componentWillUnmount() {
     this.stopCheckTyping();
   }
