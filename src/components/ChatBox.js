@@ -19,7 +19,7 @@ export default class ChatBox extends Component {
   }
 
   render() {  
-    const { handleSubmit, handleChange, currentChannel, channelConversations, id, getUsersConversations, hasToken, socketConversations, composedMessage, username } = this.props;
+    const { handleSubmit, handleChange, currentChannel, channelConversations, id, getUsersConversations, hasToken, socketConversations, composedMessage, username, guestUsername } = this.props;
   
     return (
         <div className="chatapp__mainchat--container">
@@ -40,10 +40,10 @@ export default class ChatBox extends Component {
                   ? <ul>
                       {channelConversations.map((message, index) => {
                         return (
-                          <li className={(username !== message.author[0].item.username || message.author[0].item.guestName) ? "chat--received" : null} key={`chatMsgId-${index}`}>
+                          <li className={(username !== message.author[0].item.username || message.author[0].item.guestName) ? (guestUsername === message.author[0].item.guestName) ? "" : "chat--received" : null} key={`chatMsgId-${index}`}>
                             <div className="speech--bubble--author">
                               {
-                                (username === message.author[0].item.username || message.author[0].item.guestName)
+                                (username === message.author[0].item.username )
                                   ? <p>You</p>
                                   : <p>{message.author[0].item.username || message.author[0].item.guestName}</p>
                               }
@@ -63,9 +63,9 @@ export default class ChatBox extends Component {
                   ? <ul>
                       {socketConversations.map((message, index) => {
                         return (
-                          <li className={(!message.author) ? "user--joined" : (username !== message.author) ? "chat--received" : null}key={`socketMsgId-${index}`}>
+                          <li className={(!message.author) ? "user--joined" : (username !== message.author) ? (guestUsername) ? "" : "chat--received" : null}key={`socketMsgId-${index}`}>
                               {
-                                (message.userJoined)
+                                (username !== message.userJoined)
                                   ? <p>{message.userJoined}</p>
                                   : null
                               }

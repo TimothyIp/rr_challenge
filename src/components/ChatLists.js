@@ -3,9 +3,6 @@ import AddChannelBtn from './AddChannelBtn';
 import AddDMBtn from './AddDMBtn';
 
 export default class ChatLists extends Component {
-  constructor() {
-     super();
-  }
 
   componentDidMount() {
     // Gets most recent conversations

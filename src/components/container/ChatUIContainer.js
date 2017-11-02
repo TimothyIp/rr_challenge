@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import LoginForm from '../LoginForm';
 import RegisterForm from '../RegisterForm';
-import { withCookies, Cookies } from 'react-cookie'
+import { withCookies } from 'react-cookie'
 import axios from 'axios';
 import Navigation from '../Navigation';
 import ChatBox from '../ChatBox';
@@ -56,7 +56,6 @@ class ChatUIContainer extends Component {
     this.getChannelConversations();
     
     this.initSocket();
-        
   }
 
   initSocket = () => {
@@ -76,7 +75,6 @@ class ChatUIContainer extends Component {
 
     socket.on('user joined', data => {
       const userJoined = Array.from(this.state.socketConversations);
-      const activeUser = data.split(" ");
 
       userJoined.push({
         userJoined: data
@@ -131,7 +129,9 @@ class ChatUIContainer extends Component {
     } else if (guestToken) {
       this.setState({
         guestUsername: tokenGuestUser,
-        token: guestToken
+        token: guestToken,
+        formsMethod: "",
+        formsShown: false
       });
     }
   };
@@ -230,8 +230,7 @@ class ChatUIContainer extends Component {
         guestUsername:"",
         guestSignup: "",       
         usersChannels: res.data.user.usersChannels,
-        formsMethod:"",
-        formsShown: false
+        formsMethod:""
       }, () => {
         socket.emit('enter channel', currentChannel, this.setUsername());           
       });
@@ -497,14 +496,16 @@ class ChatUIContainer extends Component {
       this.setState({
         loginError: [],
         formsMethod: "login",
-        formsShown: true
+        formsShown: true,
+        guestUsername: ""
       });
     }
 
     if (method === "register") {
       this.setState({
         formsMethod: "register",
-        formsShown: true
+        formsShown: true,
+        guestUsername: ""
       });
     }
 
@@ -518,7 +519,7 @@ class ChatUIContainer extends Component {
 
   closeForm = () => {
     this.setState({
-      formsMethod:"guest",
+      formsMethod: "guest",
       formsShown: false
     });
   }

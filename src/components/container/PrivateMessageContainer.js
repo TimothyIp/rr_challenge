@@ -64,7 +64,6 @@ export default class PrivateMessagingContainer extends Component {
 
   getPrivateMessages = () => {
     const currentPrivateRecipient = this.props.currentPrivateRecipient;
-    const username = this.props.username
 
     axios.get(`${API_URL}/chat/privatemessages/${currentPrivateRecipient._id}`, {
       headers: { Authorization: this.props.token }
