@@ -421,7 +421,7 @@ class ChatUIContainer extends Component {
     })
 
     // Checks if already in current conversation with that person
-    if (!checkForCurrentConvos.length) {
+    if (!checkForCurrentConvos.length || !usersDirectMessages.length) {
       axios.post(`${API_URL}/chat/new`, { startDmInput }, {
         headers: { Authorization: this.state.token }
       })
@@ -523,7 +523,8 @@ class ChatUIContainer extends Component {
     });
   }
 
-  closePM = () => {
+  closePM = (e) => {
+    e.stopPropagation();
     this.setState({
       currentPrivateRecipient: {}
     })

@@ -40,7 +40,7 @@ export default class ChatBox extends Component {
                   ? <ul>
                       {channelConversations.map((message, index) => {
                         return (
-                          <li className={(username !== message.author[0].item.username || message.author[0].item.guestName) ? "chat-received" : null} key={`chatMsgId-${index}`}>
+                          <li className={(username !== message.author[0].item.username || message.author[0].item.guestName) ? "chat--received" : null} key={`chatMsgId-${index}`}>
                             <div className="speech--bubble--author">
                               {
                                 (username === message.author[0].item.username || message.author[0].item.guestName)

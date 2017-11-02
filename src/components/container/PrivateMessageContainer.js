@@ -66,13 +66,12 @@ export default class PrivateMessagingContainer extends Component {
     const currentPrivateRecipient = this.props.currentPrivateRecipient;
     const username = this.props.username
 
-
     axios.get(`${API_URL}/chat/privatemessages/${currentPrivateRecipient._id}`, {
       headers: { Authorization: this.props.token }
     })
     .then(res => {
       socket.emit('enter privateMessage', res.data.conversationId)
-
+      console.log("GET PM", res.data)
       this.setState({
         privateMessageLog: res.data.conversation,
         conversationId: res.data.conversationId
@@ -116,7 +115,7 @@ export default class PrivateMessagingContainer extends Component {
     });
 
     socket.on('typing', (data) => {
-      
+
       this.setState({
         showTyping: data.isTyping,
         activeUserTyping: data.username
@@ -132,8 +131,9 @@ export default class PrivateMessagingContainer extends Component {
   }
 
   render() {
+    const { closePM } = this.props;
     return (
-      <div>
+      <div className="private__message--container" onClick={(e) => {closePM(e)}}>
         <PrivateMessaging
           handlePrivateInput={this.handlePrivateInput} 
           handlePrivateSubmit={this.handlePrivateSubmit}

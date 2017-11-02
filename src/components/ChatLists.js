@@ -62,8 +62,8 @@ export default class ChatLists extends Component {
                   ? <ul>
                       {usersDirectMessages.map((conversation, index) => {
                         return(
-                          <li key={`convoId-${index}`}>
-                              <p onClick={() => { choosePrivateMessageRecipient(conversation) }}>
+                          <li onClick={() => { choosePrivateMessageRecipient(conversation) }} key={`convoId-${index}`}>
+                              <p>
                                 {conversation.username}
                               </p>
                               <button onClick={() => {leaveConversation(conversation._id, conversation.username)}}>&#xf014;</button>

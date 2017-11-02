@@ -30,8 +30,6 @@ exports.newConversation = function(req, res, next) {
       });
     }
 
-    console.log(foundRecipient)
-
     const conversation = new Conversation({
       participants: [ req.user._id , foundRecipient._id ]
     })
@@ -76,8 +74,6 @@ exports.leaveConversation = function(req, res, next) {
 exports.postToChannel = function(req, res, next) {
   const channelName = req.params.channelName;
   const composedMessage = req.body.composedMessage;
-
-  console.log(req.user)
 
   if (!channelName) {
     res.status(422).json({
@@ -205,9 +201,9 @@ exports.getConversations = function (req, res, next) {
 exports.sendReply = function(req, res, next) {
   const privateMessage = req.body.privateMessageInput;
   const recipientId = req.body.recipientId;
+  const userId = req.user._id;
 
-
-  Conversation.findOne({ participants: recipientId }, function(err, foundConversation) {
+  Conversation.findOne({ participants: {$all: [ userId, recipientId]} }, function(err, foundConversation) {
     if (err) {
       res.send({
         errror: err
@@ -247,7 +243,6 @@ exports.sendReply = function(req, res, next) {
 }
 
 exports.getPrivateMessages = function(req, res, next) {
-  // console.log(req.params);
   const userId = req.user._id;
   const recipientId = req.params.recipientId;
 

@@ -58,77 +58,86 @@ export default class PrivateMessaging extends Component{
   }
 
   render() {
-    const { handlePrivateInput, handlePrivateSubmit, closePM, currentPrivateRecipient, privateMessageLog, socketPMs, privateMessageInput, showTyping, activeUserTyping } = this.props;
+    const { handlePrivateInput, handlePrivateSubmit, closePM, currentPrivateRecipient, privateMessageLog, socketPMs, privateMessageInput, showTyping, activeUserTyping, username } = this.props;
 
-    const privateMsg_container = {
-      width: "100%",
-      height: "590px",
-      border: "1px solid black",
-      overflow: "scroll"
-    }
-
-  
     return (
-      <div>
-        <h3>Private Messaging Window</h3>
-        <p>Conversation with {currentPrivateRecipient.username}</p>
-        <button onClick={() => {closePM()}}>Close</button>
-        <div ref="chat_container" style={privateMsg_container}>
-        {
-          (privateMessageLog.length)
-            ? <ul>
-                  {privateMessageLog.map((message, index) => {
+      <div className="private__message--window"  onClick={((e) =>{e.stopPropagation()})}>
+        <div className="chatapp__chatbox" id="private__message--input">
+          <button onClick={(e) => {closePM(e)}}>&#xf00d;</button>
+          <p>Conversation with {currentPrivateRecipient.username}</p>
+          <div className="chatapp__chatbox--messages" id="private__chatbox" ref="chat_container">
+          {
+            (privateMessageLog.length)
+              ? <ul>
+                    {privateMessageLog.map((message, index) => {
+                      return (
+                        <li className={(username !== message.author[0].item.username) ? "chat--received" : null} key={`chatMsgId-${index}`}>
+                          <div className="speech--bubble--author">
+                            {
+                              (username === message.author[0].item.username)
+                                ? <p>You</p>
+                                : <p>{message.author[0].item.username}</p>
+                            }
+                            <p className="speech--bubble--date">{Moment(message.createdAt).fromNow()}</p>
+                          </div>
+                          <div className="speech--bubble">
+                            <p>{message.body}</p>
+                          </div>
+                        </li>
+                      )
+                    })}
+                </ul>
+              : null
+          }
+          {
+            (socketPMs.length)
+              ? <ul>
+                  {socketPMs.map((message, index) => {
                     return (
-                      <li key={`chatMsgId-${index}`}>
-                        <p>{message.author[0].item.username}</p>
-                        <p>{Moment(message.createdAt).fromNow()}</p>
-                        <p>{message.body}</p>
+                      <li className={(username !== message.author[0].item.username) ? "chat--received": null} key={`socketPMsId-${index}`}>
+                        <div className="speech--bubble--author">
+                          {
+                            (username === message.author[0].item.username)
+                              ? <p>You</p>
+                              : <p>{message.author[0].item.username}</p>
+                          }
+                          <p className="speech--bubble--date">{Moment(message.createdAt).fromNow()}</p>
+                        </div>
+                        <div className="speech--bubble">
+                          <p>{message.body}</p>
+                        </div>
                       </li>
                     )
                   })}
-              </ul>
-            : <div>No current chat. Send them a message!</div>
-        }
-        {
-          (socketPMs.length)
-            ? <ul>
-                {socketPMs.map((message, index) => {
-                  return (
-                    <li key={`socketPMsId-${index}`}>
-                      <p>{message.author[0].item.username}</p>
-                      <p>{Moment(message.createdAt).fromNow()}</p>
-                      <p>{message.body}</p>
-                    </li>
-                  )
-                })}
-              </ul>
-            : null
-        }
-        {
-          (activeUserTyping !== this.props.username)
-            ? <div>
-                {
-                  (showTyping)
-                    ? `${activeUserTyping} is typing...`
-                    : null
-                }
-              </div>
-            : null
-        }
-        
+                </ul>
+              : null
+          }
+          {
+            (activeUserTyping !== this.props.username)
+              ? <div className="active__typing">
+                  {
+                    (showTyping)
+                      ? <p>
+                        {`${activeUserTyping} is typing...`}
+                        </p>
+                      : null
+                  }
+                </div>
+              : null
+          }
+          </div>
+          <form onSubmit={handlePrivateSubmit}>
+            <input 
+            onChange={handlePrivateInput} 
+            value={privateMessageInput} 
+            name="privateMessageInput" 
+            type="text" 
+            placeholder="Write a message" 
+            autoComplete="off"
+            onKeyUp= { e => { e.keyCode !== 13 && this.sendTyping()} }
+            />
+          </form>
         </div>
-        <form onSubmit={handlePrivateSubmit}>
-          <input 
-          onChange={handlePrivateInput} 
-          value={privateMessageInput} 
-          name="privateMessageInput" 
-          type="text" 
-          placeholder="Write a message" 
-          autoComplete="off"
-          onKeyUp= { e => { e.keyCode !== 13 && this.sendTyping()} }
-          />
-          <button>Send</button>
-        </form>
       </div>
     )
   } 

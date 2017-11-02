@@ -22,7 +22,7 @@ button {
 }
 
 .app--container {
-  height: 100%;
+  height: 85vh;
 }
 
 .app--container h2,
@@ -38,6 +38,7 @@ button {
   margin: 2rem;
   min-height: 80vh;
   height: 100%;
+  position: relative;
 }
 
 .chatapp__navigation--container {
@@ -395,13 +396,13 @@ button {
   text-align: right;
 }
 
-.chatapp__chatbox--messages .chat-received {
+.chatapp__chatbox--messages .chat--received {
   text-align: left;
   align-self: flex-start;
   border-left: 0px solid;
 }
 
-.chatapp__chatbox--messages .chat-received .speech--bubble {
+.chatapp__chatbox--messages .chat--received .speech--bubble {
   border-left: 2.25px solid #a77fb2;
   border-right: 0;
 }
@@ -446,4 +447,67 @@ button {
   padding-left: 1rem;
   color: #8f8f8f;
   font-weight: 300;
+}
+
+.private__message--container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,.9);
+}
+
+.private__message--window button {
+  font-family: FontAwesome, 'Open Sans', sans-serif;
+  color: #fff;
+  background: none;
+  border: none;
+  outline: none;
+  font-size: 2rem;
+  position: absolute;
+  right: -3.5rem;
+  top: -3rem;
+}
+
+.private__message--window {
+  position: absolute;
+  height: 85%;
+  width: 75vw;
+  /* max-height: 20rem; */
+  background-color: #fff;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+}
+
+.private__message--window:before {
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: 0;
+  height: 4px;
+  width: 100%;
+  background: linear-gradient(to right, #35c3c1, #3ebfac)
+}
+
+#private__message--input {
+  border-bottom-right-radius: 0;
+}
+
+.active__typing {
+  padding-left: 3rem;
+  position: fixed;
+  left: 0;
+  bottom: 5rem;
+}
+
+.active__typing p {
+  color: #8f8f8f;
+  text-align: left;
+  padding-bottom: 0.25rem;
+}
+
+#private__chatbox {
+  position: relative;
 }
