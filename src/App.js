@@ -31,11 +31,13 @@ class App extends Component {
               ? <ChatUIContainer />
               : null
           }
-          {
-            (this.state.chatShown)
-              ?  <button onClick={this.displayChat}>Leave the Chat!</button>
-              :  <button onClick={this.displayChat}>Join the Chat!</button>
-          }
+          <div className="app--container--btn">
+            {
+              (this.state.chatShown)
+                ?  <button onClick={this.displayChat}>Leave the Chat!</button>
+                :  <button onClick={this.displayChat}>Join the Chat!</button>
+            }
+          </div>
         </div>
       </CookiesProvider>
     );
