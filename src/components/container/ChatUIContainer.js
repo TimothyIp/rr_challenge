@@ -51,12 +51,12 @@ class ChatUIContainer extends Component {
   componentDidMount() {
     // Logs user or guest in if they have a token after refreshing or revisiting page.
     this.hasToken();
-        
-    // Get current channels messages
-    this.getChannelConversations();
     
     // Initialize the socket listeners for events from the backend
     this.initSocket();
+
+    // Get current channels messages
+    this.getChannelConversations();
   }
 
   // Sets up socket listeners to listen for when to refresh messages, when a new user has joined,
@@ -211,7 +211,6 @@ class ChatUIContainer extends Component {
       username: "",
       id: "",
       guestUsername: "",
-      socket: null,
       token: "",
       usersChannels: [],
       socketConversations: [],
