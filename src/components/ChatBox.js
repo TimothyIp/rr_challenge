@@ -35,7 +35,7 @@ export default class ChatBox extends Component {
           <div className="chatapp__chatbox">
             <h3>Channel: {currentChannel}</h3>
             <div className="chatapp__chatbox--messages" ref="chat_container">
-              {
+            {
                 (channelConversations)
                   ? <ul>
                       {channelConversations.map((message, index) => {

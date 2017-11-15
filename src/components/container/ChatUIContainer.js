@@ -51,7 +51,7 @@ class ChatUIContainer extends Component {
   componentDidMount() {
     // Logs user or guest in if they have a token after refreshing or revisiting page.
     this.hasToken();
-    
+
     // Initialize the socket listeners for events from the backend
     this.initSocket();
 

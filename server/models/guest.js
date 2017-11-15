@@ -11,11 +11,11 @@ const GuestSchema = new Schema({
   messages: {
     type: String
   },
-  expire_at: {
-    type: Date,
-    default: Date.now,
-    expires: 7200
-  }
+  // expire_at: {
+  //   type: Date,
+  //   default: Date.now,
+  //   expires: 7200
+  // }
 },
 {
   timestamps: true
