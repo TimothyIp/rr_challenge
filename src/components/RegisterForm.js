@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import Alert from './Alert';
 
 export default class RegisterForm extends Component {
@@ -46,4 +47,9 @@ export default class RegisterForm extends Component {
       </div>
     )
   }
+}
+
+RegisterForm.propTypes = {
+  username: PropTypes.string,
+  password: PropTypes.string,
 }

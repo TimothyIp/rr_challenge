@@ -63,7 +63,9 @@ export default class ChatLists extends Component {
                               <p>
                                 {conversation.username}
                               </p>
-                              <button onClick={() => {leaveConversation(conversation._id, conversation.username)}}>&#xf014;</button>
+                              <div onClick={(e) =>{e.stopPropagation()}}>
+                                <button onClick={() => {leaveConversation(conversation._id, conversation.username)}}>&#xf014;</button>
+                              </div>
                           </li>
                         )
                       })}

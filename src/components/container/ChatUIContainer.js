@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import LoginForm from '../LoginForm';
 import RegisterForm from '../RegisterForm';
 import { withCookies } from 'react-cookie'
@@ -650,6 +651,30 @@ class ChatUIContainer extends Component {
       </div>
     )
   }
+}
+
+ChatUIContainer.propTypes = {
+  username: PropTypes.string,
+  id: PropTypes.string,
+  loginError: PropTypes.array,
+  registrationError: PropTypes.array,
+  formsShown: PropTypes.bool,
+  formsMethod: PropTypes.string,
+  chatsShown: PropTypes.bool,
+  composedMessage: PropTypes.string,
+  currentChannel: PropTypes.string,
+  conversations: PropTypes.array,
+  channelConversations: PropTypes.array,
+  guestSignup: PropTypes.string,
+  guestUsername: PropTypes.string,
+  socketConversations: PropTypes.array,
+  usersChannels: PropTypes.array,
+  createInput: PropTypes.string,
+  startDmInput: PropTypes.string,
+  usersDirectMessages:PropTypes.array,
+  directMessageErrorLog: PropTypes.array,
+  currentPrivateRecipient: PropTypes.object,
+  token:PropTypes.string
 }
 
 export default withCookies(ChatUIContainer);

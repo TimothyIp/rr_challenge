@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types'
 import PrivateMessaging from '../PrivateMessaging';
 import axios from 'axios';
 import io from 'socket.io-client';
@@ -77,7 +78,7 @@ export default class PrivateMessagingContainer extends Component {
     .then(res => {
       socket.emit('enter privateMessage', res.data.conversationId)
       this.setState({
-        privateMessageLog: res.data.conversation,
+        privateMessageLog: res.data.conversation || [],
         conversationId: res.data.conversationId
       })
     })
@@ -153,4 +154,14 @@ export default class PrivateMessagingContainer extends Component {
       </div>
     )
   }
+}
+
+PrivateMessagingContainer.propTypes = {
+  privateMessageInput: PropTypes.string,
+  privateMessageLog: PropTypes.array,
+  conversationId: PropTypes.string,
+  socketPMs: PropTypes.array,
+  currentPrivateRecipient: PropTypes.object,
+  showTyping: PropTypes.bool,
+  activeUserTyping: PropTypes.string
 }

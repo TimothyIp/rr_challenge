@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import Alert from './Alert';
 
 
@@ -48,4 +49,9 @@ export default class LoginForm extends Component {
       </div>
     )
   }
+}
+
+LoginForm.propTypes = {
+  username: PropTypes.string,
+  password: PropTypes.string,
 }
