@@ -162,9 +162,9 @@ class ChatUIContainer extends Component {
     
     try {
       const userData = await axios.post(`${API_URL}/auth/login`, { username, password });
-      cookies.set('token', userData.data.token, { path: "/" });
-      cookies.set('user', userData.data.user, { path: "/" });
-      cookies.set('usersChannels', userData.data.user.usersChannels, { path: "/" });
+      cookies.set('token', userData.data.token, { path: "/", maxAge: 7200 });
+      cookies.set('user', userData.data.user, { path: "/", maxAge: 7200 });
+      cookies.set('usersChannels', userData.data.user.usersChannels, { path: "/", maxAge: 7200 });
       
       this.setState({
         guestUsername:"",
@@ -230,9 +230,9 @@ class ChatUIContainer extends Component {
 
     axios.post(`${API_URL}/auth/register`, { username, password })
     .then(res => {
-      cookies.set('token', res.data.token, { path: "/" })
-      cookies.set('user', res.data.user, { path: "/" })
-      cookies.set('usersChannels', res.data.user.usersChannels, { path: "/" })
+      cookies.set('token', res.data.token, { path: "/", maxAge: 7200 })
+      cookies.set('user', res.data.user, { path: "/", maxAge: 7200 })
+      cookies.set('usersChannels', res.data.user.usersChannels, { path: "/", maxAge: 7200 })
 
       this.setState({
         username: res.data.user.username,
@@ -273,8 +273,8 @@ class ChatUIContainer extends Component {
     try {
       const guestInfo = await axios.post(`${API_URL}/auth/guest`, { guestInputName })
 
-      cookies.set('guestToken', guestInfo.data.token, { path: "/" })
-      cookies.set('guestUser', guestInfo.data.guestUser.guest.guestName, { path: "/" })
+      cookies.set('guestToken', guestInfo.data.token, { path: "/", maxAge: 7200 })
+      cookies.set('guestUser', guestInfo.data.guestUser.guest.guestName, { path: "/", maxAge: 7200 })
 
       this.setState({
         guestUsername: guestInfo.data.guestUser.guest.guestName,
@@ -394,7 +394,7 @@ class ChatUIContainer extends Component {
 
       updatedUsersChannels.push(this.state.createInput);
 
-      cookies.set('usersChannels', updatedUsersChannels, { path: "/" });
+      cookies.set('usersChannels', updatedUsersChannels, { path: "/", maxAge: 7200 });
 
       this.setState({
         socketConversations:[],
@@ -418,7 +418,7 @@ class ChatUIContainer extends Component {
     .then(res => {
       const updatedChannels = res.data.updatedChannels;
 
-      cookies.set('usersChannels', updatedChannels, { path: "/" });
+      cookies.set('usersChannels', updatedChannels, { path: "/", maxAge: 7200 });
       
       this.joinChannel("Public-Main");
       this.setState({
@@ -436,7 +436,7 @@ class ChatUIContainer extends Component {
   joinChannel = (channel) => {
     const { cookies } = this.props;
 
-    cookies.set('channel', channel, { path: "/" });
+    cookies.set('channel', channel, { path: "/", maxAge: 7200 });
     
     this.setState({
       socketConversations: [],      

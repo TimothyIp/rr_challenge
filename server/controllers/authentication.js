@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken'),
 
 function generateToken(user) {
   return jwt.sign(user, config.secret, {
-    expiresIn: 20000
+    expiresIn: 7200
   });
 }
 
